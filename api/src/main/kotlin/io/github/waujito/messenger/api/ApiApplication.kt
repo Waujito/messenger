@@ -3,6 +3,7 @@ package io.github.waujito.messenger.api
 import org.apache.catalina.webresources.TomcatURLStreamHandlerFactory
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
+import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -11,6 +12,11 @@ import org.springframework.web.bind.annotation.RestController
 class ApiApplication{
 	@GetMapping("/")
 	fun hello(): String = "hello, world!"
+
+	@GetMapping("/user")
+	fun getUser(authentication: Authentication): Authentication {
+		return authentication
+	}
 }
 
 fun main(args: Array<String>) {

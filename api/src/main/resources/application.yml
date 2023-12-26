@@ -5,6 +5,12 @@ spring:
     url: jdbc:${API_POSTGRES_URI}
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://msgrauth.com
+          jwk-set-uri: http://10.5.1.5/oauth2/jwks
 
 server:
   error:

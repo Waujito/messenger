@@ -1,5 +1,6 @@
-package io.github.waujito.messenger.api.error_handlers
+package io.github.waujito.messenger.api.config
 
+import io.github.waujito.messenger.api.exceptions.ExceptionResponse
 import jakarta.servlet.RequestDispatcher
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -24,25 +25,28 @@ class ErrorController(
         const val errorPath = "/error"
     }
 
-    fun getErrorPath() : String{
+    fun getErrorPath(): String {
         return errorPath
     }
 
     @RequestMapping(value = [errorPath])
-    fun error(request: HttpServletRequest, response: HttpServletResponse, webRequest: WebRequest): ResponseEntity<ExceptionResponse> {
+    fun error(
+            request: HttpServletRequest,
+            response: HttpServletResponse,
+            webRequest: WebRequest
+    ): ResponseEntity<ExceptionResponse> {
         val status: Int =
                 request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE)?.toString()?.toInt()
                         ?: response.status
 
         val errorAttributes = getErrorAttributes(webRequest, debug)
 
-        val message: String =
-                request.getAttribute(RequestDispatcher.ERROR_MESSAGE)?.toString()
-                        ?: errorAttributes["message"] as String?
-                        ?: "An error has occurred."
-        val path: String =
-                request.getAttribute(RequestDispatcher.ERROR_REQUEST_URI)?.toString()
-                        ?: errorAttributes["path"] as String
+        val reqAttrMessage = request.getAttribute(RequestDispatcher.ERROR_MESSAGE)?.toString()
+
+        val message: String? = if (reqAttrMessage == null || reqAttrMessage == "")
+            errorAttributes["message"] as String?
+        else
+            reqAttrMessage
 
         val timestamp = errorAttributes["timestamp"].toString()
         val error: Any? = errorAttributes["error"]
@@ -50,19 +54,18 @@ class ErrorController(
 
 
         val responseBody = ExceptionResponse(
-                status= HttpStatus.valueOf(status),
-                path=path,
-                message=message,
-                timestamp=timestamp,
-                error=error,
-                stackTrace=trace
+                status = HttpStatus.valueOf(status),
+                message = message,
+                timestamp = timestamp,
+                error = error,
+                stackTrace = trace
         )
 
         return ResponseEntity.status(status)
                 .body(responseBody)
     }
 
-    private fun getErrorAttributes(request: WebRequest, includeStackTrace: Boolean): Map<String, Any> {
+    fun getErrorAttributes(request: WebRequest, includeStackTrace: Boolean): Map<String, Any> {
         var errorAttributeOptions = ErrorAttributeOptions.defaults()
 
         if (includeStackTrace)

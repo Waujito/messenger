@@ -1,4 +1,4 @@
-package io.github.waujito.messenger.api.error_handlers
+package io.github.waujito.messenger.api.exceptions
 
 import com.fasterxml.jackson.annotation.JsonGetter
 import com.fasterxml.jackson.annotation.JsonInclude
@@ -7,9 +7,11 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
+/**
+ * Exception response entity for REST error responses
+ */
 class ExceptionResponse(
         private val status: HttpStatus,
-        val path: String,
         message: String? = null,
         timestamp: String? = null,
         stackTrace: String? = null
@@ -25,14 +27,15 @@ class ExceptionResponse(
             .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
 
 
-
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private var errors: List<Any>? = null
+
     @JsonGetter
     fun errors() = errors
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private var error: Any? = null
+
     @JsonGetter
     fun error() = error
 
@@ -40,29 +43,29 @@ class ExceptionResponse(
     val stackTrace: String? = stackTrace
 
 
-    constructor(status: HttpStatus,
-                path: String,
-                message: String? = null,
-                timestamp: String? = null,
-                errors: List<Any>?,
-                stackTrace: String? = null) :
+    constructor(
+            status: HttpStatus,
+            message: String? = null,
+            timestamp: String? = null,
+            errors: List<Any>?,
+            stackTrace: String? = null
+    ) :
             this(
-                    status, path, message, timestamp, stackTrace
-            )
-    {
+                    status, message, timestamp, stackTrace
+            ) {
         this.errors = errors
     }
 
-    constructor(status: HttpStatus,
-                path: String,
-                message: String? = null,
-                timestamp: String? = null,
-                error: Any?,
-                stackTrace: String? = null) :
+    constructor(
+            status: HttpStatus,
+            message: String? = null,
+            timestamp: String? = null,
+            error: Any?,
+            stackTrace: String? = null
+    ) :
             this(
-                    status, path, message, timestamp, stackTrace
-            )
-    {
+                    status, message, timestamp, stackTrace
+            ) {
         this.error = error
     }
 }
