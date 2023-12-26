@@ -69,7 +69,4 @@ class DefaultSecurityConfig {
         source.registerCorsConfiguration("/**", configuration)
         return source
     }
-
-    @Bean
-    fun userRepository(): UserRepository = IdUserRepository()
 }
