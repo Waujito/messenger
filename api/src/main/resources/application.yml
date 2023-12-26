@@ -9,8 +9,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://msgrauth.com
-          jwk-set-uri: http://10.5.1.5/oauth2/jwks
+          issuer-uri: ${AS_ISSUER_URI}
+          jwk-set-uri: ${AS_JWKS_URI}
 
 server:
   error:
