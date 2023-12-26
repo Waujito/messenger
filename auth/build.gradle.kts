@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
 	id("org.springframework.boot") version "3.2.1"
@@ -58,4 +59,8 @@ tasks.jar {
 	manifest {
 		attributes("Main-Class" to application.mainClass)
 	}
+}
+
+tasks.named<BootJar>("bootJar") {
+	classpath(configurations["developmentOnly"])
 }

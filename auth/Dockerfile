@@ -13,7 +13,7 @@ RUN cp build/libs/*.jar /app.jar
 
 FROM gradle:8.5-jdk17-jammy as development
 COPY --from=build /app.jar /app.jar
-ENTRYPOINT ["java", "-Dspring-boot.run.jvmArguments='-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8000'", "-Dspring.profiles.active=dev","-jar","/app.jar"]
+ENTRYPOINT ["java", "-Dspring.devtools.restart.enabled=true", "-Dspring-boot.run.jvmArguments='-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8000'", "-Dspring.profiles.active=dev","-jar","/app.jar"]
 
 FROM gradle:8.5-jdk17-jammy as production
 COPY --from=build /app.jar /app.jar

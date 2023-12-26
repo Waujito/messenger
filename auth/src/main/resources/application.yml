@@ -26,4 +26,3 @@ server:
   error:
     whitelabel:
       enabled: false
-  port: 80
