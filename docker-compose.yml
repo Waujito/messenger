@@ -1,0 +1,62 @@
+version: '3'
+
+services:
+  auth:
+    build:
+      context: ./auth
+      target: development
+    deploy:
+      restart_policy:
+          condition: on-failure
+          delay: 3s
+          max_attempts: 5
+          window: 60s
+    networks:
+      messenger:
+        ipv4_address: 10.5.1.5
+    ports:
+      - 5001:80
+      - 50001:8000
+    env_file:
+      - ./auth/.env
+      - .postgresql.env
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:16-alpine
+    restart: always
+    networks:
+      messenger:
+        ipv4_address: 10.5.1.100
+    environment:
+      PGDATA: /data/db
+    volumes:
+      - pgstorage:/data/db
+      - ./init-postgres.sh:/docker-entrypoint-initdb.d/init-db.sh
+    env_file:
+      - .postgresql.env
+  
+  adminer:
+    image: adminer
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 3s
+        max_attempts: 5
+        window: 60s    
+    networks:
+      messenger:
+        ipv4_address: 10.5.1.101    
+    ports:
+      - 8080:8080
+
+volumes:
+  pgstorage:     
+
+networks:
+  messenger:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.5.1.0/16

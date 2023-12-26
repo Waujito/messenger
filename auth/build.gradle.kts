@@ -5,7 +5,9 @@ plugins {
 	id("io.spring.dependency-management") version "1.1.4"
 	kotlin("jvm") version "1.9.21"
 	kotlin("plugin.spring") version "1.9.21"
-  kotlin("plugin.jpa") version "1.9.21"
+  	kotlin("plugin.jpa") version "1.9.21"
+	application
+	java
 }
 
 group = "io.github.waujito.messenger"
@@ -21,13 +23,16 @@ repositories {
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-  runtimeOnly("org.postgresql:postgresql")
+  	runtimeOnly("org.postgresql:postgresql")
 
 	implementation("org.springframework.boot:spring-boot-starter-oauth2-authorization-server")
 	implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 	implementation("org.springframework.boot:spring-boot-starter-security")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+
+	implementation("com.nimbusds:nimbus-jose-jwt:9.31")
+
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
@@ -43,4 +48,14 @@ tasks.withType<KotlinCompile> {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+}
+
+application {
+	mainClass.set("io.github.waujito.messenger.auth.AuthenticationServiceApplicationKt")
+}
+
+tasks.jar {
+	manifest {
+		attributes("Main-Class" to application.mainClass)
+	}
 }

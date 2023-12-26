@@ -1,0 +1,6 @@
+spring:
+  devtools:
+    remote:
+      secret: ${DEVTOOLS_REMOTE_SECRET}
+    restart:
+      enabled: true
