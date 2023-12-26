@@ -1,0 +1,12 @@
+spring:
+  profiles:
+    active: "prod"
+  datasource:
+    url: jdbc:${API_POSTGRES_URI}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+
+server:
+  error:
+    whitelabel:
+      enabled: false

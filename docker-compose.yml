@@ -23,6 +23,29 @@ services:
     depends_on:
       - postgres
 
+  api:
+    build:
+      context: ./api
+      target: development
+    deploy:
+      restart_policy:
+          condition: on-failure
+          delay: 3s
+          max_attempts: 5
+          window: 60s
+    networks:
+      messenger:
+        ipv4_address: 10.5.1.10
+    ports:
+      - 5010:80
+      - 50010:8000
+    env_file:
+      - ./api/.env
+      - .postgresql.env
+    depends_on:
+      - postgres
+      - auth
+
   postgres:
     image: postgres:16-alpine
     restart: always

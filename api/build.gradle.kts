@@ -1,11 +1,14 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
 	id("org.springframework.boot") version "3.2.1"
 	id("io.spring.dependency-management") version "1.1.4"
 	kotlin("jvm") version "1.9.21"
 	kotlin("plugin.spring") version "1.9.21"
-  kotlin("plugin.jpa") version "1.9.21"
+  	kotlin("plugin.jpa") version "1.9.21"
+	application
+	java
 }
 
 group = "io.github.waujito.messenger"
@@ -21,7 +24,7 @@ repositories {
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-  runtimeOnly("org.postgresql:postgresql")
+  	runtimeOnly("org.postgresql:postgresql")
   
 	implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
 	implementation("org.springframework.boot:spring-boot-starter-web")
@@ -40,4 +43,19 @@ tasks.withType<KotlinCompile> {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+}
+
+application {
+	mainClass.set("io.github.waujito.messenger.api.ApiApplicationKt")
+
+}
+
+tasks.jar {
+	manifest {
+		attributes("Main-Class" to application.mainClass)
+	}
+}
+
+tasks.named<BootJar>("bootJar") {
+	classpath(configurations["developmentOnly"])
 }

@@ -4,9 +4,6 @@ spring:
       secret: ${DEVTOOLS_REMOTE_SECRET}
     restart:
       enabled: true
-logging:
-  level:
-    web: DEBUG
 
 server:
   port:
