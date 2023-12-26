@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class ApiApplication{
 	@GetMapping("/")
-	fun hello(): String = "hello, worlds!"
+	fun hello(): String = "hello, world!"
 }
 
 fun main(args: Array<String>) {
