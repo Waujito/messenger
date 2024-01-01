@@ -1,26 +1,19 @@
 package io.github.waujito.messenger.api.chat.messages
 
 import io.github.waujito.messenger.api.chat.Chat
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.ManyToOne
+import jakarta.persistence.*
 import jakarta.validation.constraints.Size
 import org.hibernate.annotations.*
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
+import org.springframework.data.jpa.domain.AbstractPersistable
+import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.util.Date
 import java.util.UUID
 
 @Entity
-class Message(chat: Chat, authorId: String, content: String) {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    var id: UUID? = null
-        private set
-
+@EntityListeners(AuditingEntityListener::class)
+class Message(chat: Chat, authorId: String, content: String) : AbstractPersistable<UUID>() {
     @ManyToOne(optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     var chat: Chat = chat
@@ -44,4 +37,18 @@ class Message(chat: Chat, authorId: String, content: String) {
     @Column(nullable = true, updatable = true)
     var updatedAt: Date? = null
         private set
+
+    override fun equals(other: Any?): Boolean {
+        return super.equals(other)
+    }
+
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + chat.hashCode()
+        result = 31 * result + authorId.hashCode()
+        result = 31 * result + content.hashCode()
+        result = 31 * result + (createdAt?.hashCode() ?: 0)
+        result = 31 * result + (updatedAt?.hashCode() ?: 0)
+        return result
+    }
 }

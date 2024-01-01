@@ -16,7 +16,7 @@ import java.util.*
 @EntityListeners(AuditingEntityListener::class)
 class Chat(name: String) : AbstractPersistable<UUID>() {
     @Column(nullable = false)
-    @Size(max=255)
+    @Size(min = 3, max = 255)
     var name: String = name
         private set
 
@@ -29,4 +29,17 @@ class Chat(name: String) : AbstractPersistable<UUID>() {
     @Column(nullable = true, updatable = true)
     var updatedAt: Date? = null
         private set
+
+
+    override fun equals(other: Any?): Boolean {
+        return super.equals(other)
+    }
+
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + name.hashCode()
+        result = 31 * result + (createdAt?.hashCode() ?: 0)
+        result = 31 * result + (updatedAt?.hashCode() ?: 0)
+        return result
+    }
 }
