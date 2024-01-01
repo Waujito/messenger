@@ -11,6 +11,9 @@ spring:
         jwt:
           issuer-uri: ${AS_ISSUER_URI}
           jwk-set-uri: ${AS_JWKS_URI}
+  jpa:
+    hibernate:
+      ddl-auto: update
 
 server:
   error:
