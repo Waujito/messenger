@@ -8,7 +8,6 @@ import org.springframework.security.config.annotation.web.invoke
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper
 import org.springframework.security.web.SecurityFilterChain
-import org.springframework.security.web.context.NullSecurityContextRepository
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
@@ -49,20 +48,20 @@ class DefaultSecurityConfig {
             configuration.allowedMethods = listOf("HEAD", "GET", "POST", "PUT", "DELETE", "PATCH")
             configuration.allowCredentials = true
             configuration.allowedHeaders =
-                    listOf(
-                            "Accept",
-                            "Origin",
-                            "Content-Type",
-                            "Depth",
-                            "User-Agent",
-                            "If-Modified-Since,",
-                            "Cache-Control",
-                            "Authorization",
-                            "X-Req",
-                            "X-File-Size",
-                            "X-Requested-With",
-                            "X-File-Name"
-                    )
+                listOf(
+                    "Accept",
+                    "Origin",
+                    "Content-Type",
+                    "Depth",
+                    "User-Agent",
+                    "If-Modified-Since,",
+                    "Cache-Control",
+                    "Authorization",
+                    "X-Req",
+                    "X-File-Size",
+                    "X-Requested-With",
+                    "X-File-Name"
+                )
 
             val source = UrlBasedCorsConfigurationSource()
             source.registerCorsConfiguration("/**", configuration)
@@ -81,13 +80,13 @@ class DefaultSecurityConfig {
      * info step
      */
     private fun userAuthoritiesMapper(): GrantedAuthoritiesMapper =
-            GrantedAuthoritiesMapper { authorities: Collection<GrantedAuthority> ->
-                val mappedAuthorities = authorities.toMutableList()
+        GrantedAuthoritiesMapper { authorities: Collection<GrantedAuthority> ->
+            val mappedAuthorities = authorities.toMutableList()
 
-                // Adds OAUTH2_CLIENT_GOOGLE to all users logged in through OAuth2
-                // Here is only one client, so it is allowed
-                mappedAuthorities.add(GrantedAuthority { "OAUTH2_CLIENT_GOOGLEs" })
+            // Adds OAUTH2_CLIENT_GOOGLE to all users logged in through OAuth2
+            // Here is only one client, so it is allowed
+            mappedAuthorities.add(GrantedAuthority { "OAUTH2_CLIENT_GOOGLEs" })
 
-                mappedAuthorities
-            }
+            mappedAuthorities
+        }
 }

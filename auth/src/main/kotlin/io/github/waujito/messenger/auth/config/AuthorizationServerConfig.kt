@@ -31,8 +31,8 @@ import org.springframework.security.oauth2.server.authorization.settings.TokenSe
 import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer
 import org.springframework.security.web.SecurityFilterChain
-import java.util.*
 import java.time.Duration
+import java.util.*
 
 
 @Configuration(proxyBeanMethods = false)
@@ -65,7 +65,7 @@ class AuthorizationServerConfig(@Value("\${ISSUER}") private val issuer: String)
      */
     @Bean
     fun tokenCustomizer(
-            authorizedClientService: OAuth2AuthorizedClientService
+        authorizedClientService: OAuth2AuthorizedClientService
     ): OAuth2TokenCustomizer<JwtEncodingContext> = OAuth2TokenCustomizer { context ->
         if (context.tokenType == OAuth2TokenType.ACCESS_TOKEN) {
             val claims = context.claims
@@ -77,10 +77,10 @@ class AuthorizationServerConfig(@Value("\${ISSUER}") private val issuer: String)
                 claims.claim("userType", "google")
 
                 val authorizedClient =
-                        authorizedClientService.loadAuthorizedClient<OAuth2AuthorizedClient>(
-                                "google",
-                                principal.name
-                        )
+                    authorizedClientService.loadAuthorizedClient<OAuth2AuthorizedClient>(
+                        "google",
+                        principal.name
+                    )
 
                 val googleAccessToken = authorizedClient.accessToken
 
@@ -96,19 +96,19 @@ class AuthorizationServerConfig(@Value("\${ISSUER}") private val issuer: String)
         // It is a public client, so
         // No client_secret. Proof Key for Code Exchange (PKCE) required
         val frontendClient =
-                RegisteredClient.withId(UUID.randomUUID().toString())
-                        .clientId("msgrWebFrontend")
-                        .clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
-                        .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                        .clientSettings(ClientSettings.builder().requireProofKey(true).build())
-                        .tokenSettings(
-                                TokenSettings.builder()
-                                        .accessTokenTimeToLive(Duration.ofDays(1))
-                                        .build()
-                        )
-                        .scope(OidcScopes.OPENID)
-                        .redirectUri("http://10.5.1.3:8080/login_callback")
+            RegisteredClient.withId(UUID.randomUUID().toString())
+                .clientId("msgrWebFrontend")
+                .clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
+                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                .clientSettings(ClientSettings.builder().requireProofKey(true).build())
+                .tokenSettings(
+                    TokenSettings.builder()
+                        .accessTokenTimeToLive(Duration.ofDays(1))
                         .build()
+                )
+                .scope(OidcScopes.OPENID)
+                .redirectUri("http://10.5.1.3:8080/login_callback")
+                .build()
         return InMemoryRegisteredClientRepository(frontendClient)
     }
 
@@ -127,8 +127,8 @@ class AuthorizationServerConfig(@Value("\${ISSUER}") private val issuer: String)
     @Bean
     fun authorizationServerSettings(): AuthorizationServerSettings {
         return AuthorizationServerSettings.builder()
-                // The URL the Authorization Server uses as its Issuer Identifier.
-                .issuer(issuer)
-                .build()
+            // The URL the Authorization Server uses as its Issuer Identifier.
+            .issuer(issuer)
+            .build()
     }
 }

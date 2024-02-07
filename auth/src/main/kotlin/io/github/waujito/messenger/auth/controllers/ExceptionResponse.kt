@@ -8,11 +8,11 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 class ExceptionResponse(
-        private val status: HttpStatus,
-        val path: String,
-        message: String? = null,
-        timestamp: String? = null,
-        stackTrace: String? = null
+    private val status: HttpStatus,
+    val path: String,
+    message: String? = null,
+    timestamp: String? = null,
+    stackTrace: String? = null
 ) {
     @JsonGetter
     fun status(): Int = status.value()
@@ -21,18 +21,19 @@ class ExceptionResponse(
     val message: String? = message
 
     val timestamp = timestamp ?: ZonedDateTime
-            .now(ZoneId.of("UTC"))
-            .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-
+        .now(ZoneId.of("UTC"))
+        .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
 
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private var errors: List<Any>? = null
+
     @JsonGetter
     fun errors() = errors
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private var error: Any? = null
+
     @JsonGetter
     fun error() = error
 
@@ -40,29 +41,31 @@ class ExceptionResponse(
     val stackTrace: String? = stackTrace
 
 
-    constructor(status: HttpStatus,
-                path: String,
-                message: String? = null,
-                timestamp: String? = null,
-                errors: List<Any>?,
-                stackTrace: String? = null) :
+    constructor(
+        status: HttpStatus,
+        path: String,
+        message: String? = null,
+        timestamp: String? = null,
+        errors: List<Any>?,
+        stackTrace: String? = null
+    ) :
             this(
-                    status, path, message, timestamp, stackTrace
-            )
-    {
+                status, path, message, timestamp, stackTrace
+            ) {
         this.errors = errors
     }
 
-    constructor(status: HttpStatus,
-                path: String,
-                message: String? = null,
-                timestamp: String? = null,
-                error: Any?,
-                stackTrace: String? = null) :
+    constructor(
+        status: HttpStatus,
+        path: String,
+        message: String? = null,
+        timestamp: String? = null,
+        error: Any?,
+        stackTrace: String? = null
+    ) :
             this(
-                    status, path, message, timestamp, stackTrace
-            )
-    {
+                status, path, message, timestamp, stackTrace
+            ) {
         this.error = error
     }
 }

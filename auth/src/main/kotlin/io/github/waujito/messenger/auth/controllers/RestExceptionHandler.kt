@@ -17,7 +17,7 @@ class RestExceptionHandler : ResponseEntityExceptionHandler() {
     @ExceptionHandler(RuntimeException::class)
     fun handleRuntimeException(e: RuntimeException, request: WebRequest): ResponseEntity<ExceptionResponse> {
         return ResponseEntity
-                .status(500)
-                .body(ExceptionResponse(HttpStatus.valueOf(500), request.contextPath, e.message))
+            .status(500)
+            .body(ExceptionResponse(HttpStatus.valueOf(500), request.contextPath, e.message))
     }
 }

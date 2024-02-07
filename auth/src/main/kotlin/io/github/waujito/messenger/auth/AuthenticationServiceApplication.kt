@@ -10,19 +10,19 @@ import org.springframework.web.bind.annotation.RestController
 
 @SpringBootApplication
 @RestController
-class AuthenticationServiceApplication{
+class AuthenticationServiceApplication {
 
-	@GetMapping("/")
-	fun root(auth: Authentication): Collection<GrantedAuthority>{
-		return auth.authorities
-	}
+    @GetMapping("/")
+    fun root(auth: Authentication): Collection<GrantedAuthority> {
+        return auth.authorities
+    }
 }
 
 fun main(args: Array<String>) {
-	// Disables TomcatURLStreamHandlerFactory
-	// to bypass the factory is already defined exception
-	// when auto reloading the application with spring DevTools remote
-	TomcatURLStreamHandlerFactory.disable()
+    // Disables TomcatURLStreamHandlerFactory
+    // to bypass the factory is already defined exception
+    // when auto reloading the application with spring DevTools remote
+    TomcatURLStreamHandlerFactory.disable()
 
-	runApplication<AuthenticationServiceApplication>(*args)
+    runApplication<AuthenticationServiceApplication>(*args)
 }

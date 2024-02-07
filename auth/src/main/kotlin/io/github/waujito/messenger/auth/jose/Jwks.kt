@@ -20,9 +20,9 @@ object Jwks {
         val publicKey = keyPair.public as RSAPublicKey
         val privateKey = keyPair.private as RSAPrivateKey
         return RSAKey.Builder(publicKey)
-                .privateKey(privateKey)
-                .keyID(UUID.randomUUID().toString())
-                .build()
+            .privateKey(privateKey)
+            .keyID(UUID.randomUUID().toString())
+            .build()
     }
 
     @JvmStatic
@@ -32,16 +32,16 @@ object Jwks {
         val privateKey = keyPair.private as ECPrivateKey
         val curve = Curve.forECParameterSpec(publicKey.params)
         return ECKey.Builder(curve, publicKey)
-                .privateKey(privateKey)
-                .keyID(UUID.randomUUID().toString())
-                .build()
+            .privateKey(privateKey)
+            .keyID(UUID.randomUUID().toString())
+            .build()
     }
 
     @JvmStatic
     fun generateSecret(): OctetSequenceKey {
         val secretKey: SecretKey = KeyGeneratorUtils.generateSecretKey()
         return OctetSequenceKey.Builder(secretKey)
-                .keyID(UUID.randomUUID().toString())
-                .build()
+            .keyID(UUID.randomUUID().toString())
+            .build()
     }
 }
