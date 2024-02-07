@@ -1,15 +1,18 @@
 package io.github.waujito.messenger.api.chat.messages
 
 import io.github.waujito.messenger.api.chat.Chat
-import jakarta.persistence.*
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.EntityListeners
+import jakarta.persistence.ManyToOne
 import jakarta.validation.constraints.Size
-import org.hibernate.annotations.*
+import org.hibernate.annotations.OnDelete
+import org.hibernate.annotations.OnDeleteAction
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.AbstractPersistable
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
-import java.util.Date
-import java.util.UUID
+import java.util.*
 
 @Entity
 @EntityListeners(AuditingEntityListener::class)
@@ -24,7 +27,7 @@ class Message(chat: Chat, authorId: String, content: String) : AbstractPersistab
         private set
 
     @Column(columnDefinition = "TEXT", nullable = false, updatable = true)
-    @Size(max=8192)
+    @Size(max = 8192)
     var content: String = content
         private set
 

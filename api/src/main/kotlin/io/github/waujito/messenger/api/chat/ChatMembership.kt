@@ -1,6 +1,9 @@
 package io.github.waujito.messenger.api.chat
 
-import jakarta.persistence.*
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.EntityListeners
+import jakarta.persistence.ManyToOne
 import org.hibernate.annotations.OnDelete
 import org.hibernate.annotations.OnDeleteAction
 import org.springframework.data.annotation.CreatedDate
@@ -32,7 +35,7 @@ class ChatMembership(userId: String, chat: Chat) : AbstractPersistable<UUID>() {
     override fun equals(other: Any?): Boolean {
         if (super.equals(other)) return true
 
-        if (other is ChatMembership){
+        if (other is ChatMembership) {
             return other.userId == this.userId && other.chat == this.chat
         }
 

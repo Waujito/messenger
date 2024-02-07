@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 class ClientHttpExceptionHandler : BaseExceptionHandler() {
     @ExceptionHandler(NotFoundException::class)
     fun handleNotFound(ex: NotFoundException) = baseHandler(ex, HttpStatus.NOT_FOUND)
+
     @ExceptionHandler(BadRequestException::class)
     fun handleBadRequest(ex: BadRequestException) = baseHandler(ex, HttpStatus.BAD_REQUEST, "Bad Request")
 }

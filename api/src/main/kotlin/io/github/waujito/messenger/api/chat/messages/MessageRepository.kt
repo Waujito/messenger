@@ -5,10 +5,10 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.PagingAndSortingRepository
 import org.springframework.stereotype.Repository
-import java.util.UUID
+import java.util.*
 
 @Repository
-interface MessageRepository: PagingAndSortingRepository<Message, UUID>, CrudRepository<Message, UUID> {
+interface MessageRepository : PagingAndSortingRepository<Message, UUID>, CrudRepository<Message, UUID> {
     fun getById(id: UUID): Message
 
     fun findAllByChatOrderByCreatedAtDesc(chat: Chat, pageable: Pageable): List<Message>

@@ -1,6 +1,5 @@
 package io.github.waujito.messenger.api.config
 
-import io.github.waujito.messenger.api.user.IdUserRepository
 import io.github.waujito.messenger.api.user.UserAuthenticationConverter
 import io.github.waujito.messenger.api.user.UserAuthenticationEntryPoint
 import io.github.waujito.messenger.api.user.UserRepository

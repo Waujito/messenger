@@ -1,6 +1,8 @@
 package io.github.waujito.messenger.api.chat
 
-import jakarta.persistence.*
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.EntityListeners
 import jakarta.validation.constraints.Size
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate

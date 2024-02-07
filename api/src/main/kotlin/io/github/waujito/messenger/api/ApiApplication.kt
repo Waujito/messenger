@@ -9,21 +9,21 @@ import org.springframework.web.bind.annotation.RestController
 
 @SpringBootApplication
 @RestController
-class ApiApplication{
-	@GetMapping("/")
-	fun hello(): String = "hello, world!"
+class ApiApplication {
+    @GetMapping("/")
+    fun hello(): String = "hello, world!"
 
-	@GetMapping("/user")
-	fun getUser(authentication: Authentication): Authentication {
-		return authentication
-	}
+    @GetMapping("/user")
+    fun getUser(authentication: Authentication): Authentication {
+        return authentication
+    }
 }
 
 fun main(args: Array<String>) {
-	// Disables TomcatURLStreamHandlerFactory
-	// to bypass the factory is already defined exception
-	// when auto reloading the application with spring DevTools remote
-	TomcatURLStreamHandlerFactory.disable()
+    // Disables TomcatURLStreamHandlerFactory
+    // to bypass the factory is already defined exception
+    // when auto reloading the application with spring DevTools remote
+    TomcatURLStreamHandlerFactory.disable()
 
-	runApplication<ApiApplication>(*args)
+    runApplication<ApiApplication>(*args)
 }

@@ -1,6 +1,5 @@
 package io.github.waujito.messenger.api.user
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.net.URI
 import java.net.http.HttpClient
@@ -10,7 +9,7 @@ import java.net.http.HttpResponse
 /**
  * Fetches the user from the authentication server
  */
-fun fetchAuthenticationServerUser(token: String, userinfoUri: String): ASUser{
+fun fetchAuthenticationServerUser(token: String, userinfoUri: String): ASUser {
     val httpClient = HttpClient.newHttpClient()
 
     val uri = URI(userinfoUri)
