@@ -1,10 +1,7 @@
 package io.github.waujito.messenger.api.chat.messages
 
 import io.github.waujito.messenger.api.chat.Chat
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.EntityListeners
-import jakarta.persistence.ManyToOne
+import jakarta.persistence.*
 import jakarta.validation.constraints.Size
 import org.hibernate.annotations.OnDelete
 import org.hibernate.annotations.OnDeleteAction
@@ -16,6 +13,12 @@ import java.util.*
 
 @Entity
 @EntityListeners(AuditingEntityListener::class)
+@Table(name = "message",
+        indexes = [
+            Index(name = "messages_by_creation", columnList = "createdAt DESC")
+        ]
+
+)
 class Message(chat: Chat, authorId: String, content: String) : AbstractPersistable<UUID>() {
     @ManyToOne(optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -29,7 +32,6 @@ class Message(chat: Chat, authorId: String, content: String) : AbstractPersistab
     @Column(columnDefinition = "TEXT", nullable = false, updatable = true)
     @Size(max = 8192)
     var content: String = content
-        private set
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
@@ -40,6 +42,10 @@ class Message(chat: Chat, authorId: String, content: String) : AbstractPersistab
     @Column(nullable = true, updatable = true)
     var updatedAt: Date? = null
         private set
+
+//    fun getRawMessage(): RawMessage{
+//        return RawMessage(authorId, content, createdAt, updatedAt)
+//    }
 
     override fun equals(other: Any?): Boolean {
         return super.equals(other)

@@ -12,4 +12,7 @@ class ClientHttpExceptionHandler : BaseExceptionHandler() {
 
     @ExceptionHandler(BadRequestException::class)
     fun handleBadRequest(ex: BadRequestException) = baseHandler(ex, HttpStatus.BAD_REQUEST, "Bad Request")
+
+    @ExceptionHandler(ForbiddenException::class)
+    fun handleBadRequest(ex: ForbiddenException) = baseHandler(ex, HttpStatus.FORBIDDEN, "Forbidden")
 }

@@ -8,7 +8,7 @@ COPY build.gradle.kts .
 COPY settings.gradle.kts .
 COPY src src
 
-RUN --mount=type=cache,target=/root/.gradle gradle bootJar --no-daemon
+RUN --mount=type=cache,target=/root/.gradle gradle bootJar --parallel
 RUN cp build/libs/*.jar /app.jar
 
 EXPOSE 8080
