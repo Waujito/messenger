@@ -4,6 +4,7 @@ services:
   frontend:
     image: node:20-alpine
     command: sh -c "yarn install && yarn run dev"
+    user: 1000:1000
     deploy:
       restart_policy:
           condition: on-failure
