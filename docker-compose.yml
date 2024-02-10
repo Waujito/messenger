@@ -1,6 +1,24 @@
 version: '3'
 
 services:
+  frontend:
+    image: node:20-alpine
+    command: sh -c "yarn install && yarn run dev"
+    deploy:
+      restart_policy:
+          condition: on-failure
+          delay: 3s
+          max_attempts: 5
+          window: 60s
+    networks:
+      messenger:
+        ipv4_address: 10.5.1.3
+    ports:
+      - 80:3000
+    working_dir: /frontend
+    volumes:
+      - ./web_frontend:/frontend
+
   auth:
     build:
       context: ./auth
