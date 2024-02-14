@@ -84,7 +84,7 @@ export const useUserStore = defineStore("user", () => {
   }
 
   function postLogin() {
-    router.push("/dashboard");
+    router.push("/board");
   }
 
   return {
