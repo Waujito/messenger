@@ -4,7 +4,7 @@ import type { ReadyUser } from "~/types/user";
 
 const userStore = useUserStore();
 
-const user = computed(() => userStore.user as ReadyUser);
+const user = userStore.readyUser;
 </script>
 
 <template>

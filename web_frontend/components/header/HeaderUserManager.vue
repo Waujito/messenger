@@ -3,7 +3,7 @@ import { useUserStore } from "~/stores/user";
 import type { User } from "~/types/user";
 const userStore = useUserStore();
 
-const user = computed(() => userStore.user);
+const user = userStore.user;
 </script>
 
 <template>

@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import type { User } from "~/types/user";
+import type { ReadyUser, User } from "~/types/user";
 import { deleteJWT, getJWT, getJWTOrNull } from "~/helpers/auth/jwt";
 import { loadUser } from "~/helpers/auth/user";
 import { OAuth2AuthorizeFlow } from "~/helpers/auth/oauth2";
@@ -33,6 +33,13 @@ export const useUserStore = defineStore("user", () => {
     if (user.value.state == "loading") await awaitForUserLoading();
 
     return user.value;
+  }
+
+  async function getReadyUser(): Promise<ReadyUser> {
+    const user = await getUser();
+
+    if (user.state === "ready") return user;
+    else throw new Error("User is not ready!");
   }
 
   async function awaitForUserLoading() {
@@ -81,8 +88,10 @@ export const useUserStore = defineStore("user", () => {
   }
 
   return {
-    user,
+    user: computed(() => user),
+    readyUser: computed(() => user as Ref<ReadyUser>),
     getUser,
+    getReadyUser,
     reloadUser,
     loginFlow,
     isAuthenticated,
