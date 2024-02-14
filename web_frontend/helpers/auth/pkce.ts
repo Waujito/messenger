@@ -71,7 +71,7 @@ export function performFinalPKCE_flow(
   const codeVerifier = sessionStorage.getItem(storageCodeVerifierName);
 
   if (!codeVerifier)
-    throw Error("Code verifier is undefined. PKCE flow failed.");
+    throw new Error("Code verifier is undefined. PKCE flow failed.");
 
   sessionStorage.removeItem(storageCodeVerifierName);
 
