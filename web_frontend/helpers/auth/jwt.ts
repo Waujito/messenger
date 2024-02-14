@@ -28,8 +28,7 @@ export function getJWT(): JWT {
  * @returns User JWT Authorization token
  */
 export function getJWTOrNull(): JWT | null {
-  if (!window) return null;
-  const rawToken = window.localStorage.getItem(JWTAuthorizationTokenName);
+  const rawToken = localStorage.getItem(JWTAuthorizationTokenName);
   if (!rawToken) return null;
 
   const token: JWT = { ...jwtDecode(rawToken), rawToken };
@@ -53,12 +52,12 @@ export function getJWTOrNull(): JWT | null {
  * @param rawToken JWT raw token
  */
 export function setJWT(rawToken: string) {
-  if (window) window.localStorage.setItem(JWTAuthorizationTokenName, rawToken);
+  localStorage.setItem(JWTAuthorizationTokenName, rawToken);
 }
 
 /**
  * Deletes user jwt authorization token
  */
 export function deleteJWT() {
-  if (window) window.localStorage.removeItem(JWTAuthorizationTokenName);
+  localStorage.removeItem(JWTAuthorizationTokenName);
 }

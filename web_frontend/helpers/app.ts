@@ -1,7 +1,4 @@
 /**
  * An origin URL for the application
  */
-export function baseURL() {
-  if (!window) return "";
-  return `${window.location.origin}/`;
-}
+export const baseURL = `${window.location.origin}/`;

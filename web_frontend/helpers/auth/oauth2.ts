@@ -7,7 +7,7 @@ import {
   performInitialPKCE_flow,
 } from "./pkce";
 
-// const runtimeConfig = ;
+const runtimeConfig = useRuntimeConfig();
 
 /**
  * OAuth2 redirect path (redirect_uri = host/redirect_path)
@@ -19,7 +19,7 @@ export const redirect_path = "login_callback";
  * OAuth2 redirect uri
  */
 export function redirect_uri() {
-  return `${baseURL()}${redirect_path}`;
+  return `${baseURL}${redirect_path}`;
 }
 
 export type tokenResponse = {
@@ -36,9 +36,9 @@ export type tokenResponse = {
 export async function OAuth2AuthorizeFlow() {
   const { codeChallenge } = performInitialPKCE_flow();
 
-  let url = `${AS_URL()}/oauth2/authorize?`;
+  let url = `${AS_URL}/oauth2/authorize?`;
 
-  url += `client_id=${useRuntimeConfig().public.clientId}&`;
+  url += `client_id=${runtimeConfig.public.clientId}&`;
   url += `redirect_uri=${redirect_uri()}&`;
   url += `response_type=code&`;
   url += `scope=openid&`;
@@ -70,10 +70,10 @@ export async function OAuth2Callback(code: string) {
   const code_verifier: string = performFinalPKCE_flow();
 
   try {
-    const response = await authAPI().postForm(`/oauth2/token`, {
+    const response = await authAPI.postForm(`/oauth2/token`, {
       code,
       grant_type: "authorization_code",
-      client_id: useRuntimeConfig().public.clientId,
+      client_id: runtimeConfig.public.clientId,
       redirect_uri: redirect_uri(),
       code_verifier,
     });
