@@ -10,19 +10,19 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
-    "@vue/compiler-sfc": "^3.4.18",
+    "@pinia/nuxt": "^0.5.1",
+    "@vue/compiler-sfc": "3.4.19",
     "axios": "^1.6.7",
     "crypto-js": "^4.2.0",
     "jwt-decode": "^4.0.0",
-    "nuxt": "^3.10.1",
-    "vue": "^3.4.15",
-    "vue-router": "^4.2.5",
-    "@pinia/nuxt": "^0.5.1"
+    "nuxt": "3.10.2",
+    "vue": "3.4.19",
+    "vue-router": "^4.2.5"
   },
   "devDependencies": {
     "@types/crypto-js": "^4.2.2",
-    "@typescript-eslint/eslint-plugin": "^6.21.0",
-    "@typescript-eslint/parser": "^6.21.0",
+    "@typescript-eslint/eslint-plugin": "7.0.1",
+    "@typescript-eslint/parser": "7.0.1",
     "@vue/eslint-config-prettier": "^9.0.0",
     "@vue/eslint-config-typescript": "^12.0.0",
     "eslint": "^8.56.0",
