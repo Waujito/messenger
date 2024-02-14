@@ -13,4 +13,12 @@ export default defineNuxtConfig({
   },
 
   modules: ["@pinia/nuxt"],
+
+  runtimeConfig: {
+    public: {
+      authorizationServerURL: "",
+      apiURL: "",
+      clientId: "",
+    },
+  },
 });

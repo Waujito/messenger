@@ -107,7 +107,7 @@ class AuthorizationServerConfig(@Value("\${ISSUER}") private val issuer: String)
                         .build()
                 )
                 .scope(OidcScopes.OPENID)
-                .redirectUri("http://10.5.1.3:8080/login_callback")
+                .redirectUri("http://10.5.1.3:3000/login_callback")
                 .build()
         return InMemoryRegisteredClientRepository(frontendClient)
     }
