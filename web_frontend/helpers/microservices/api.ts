@@ -3,6 +3,7 @@ import axios, {
   type AxiosInstance,
   type CreateAxiosDefaults,
 } from "axios";
+import { API_URL } from "../app";
 
 /**
  * Defines an error handler for axios

@@ -1,3 +1,8 @@
+<script setup lang="ts">
+definePageMeta({
+  layout: "messaging",
+});
+</script>
 <template>
-  <div>Welcome to the messenger!</div>
+  <BoardChatAreaComponent />
 </template>
