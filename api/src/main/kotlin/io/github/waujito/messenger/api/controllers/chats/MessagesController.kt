@@ -1,6 +1,7 @@
 package io.github.waujito.messenger.api.controllers.chats
 
 import io.github.waujito.messenger.api.chat.ChatRepository
+import io.github.waujito.messenger.api.chat.messages.Message
 import io.github.waujito.messenger.api.chat.messages.MessageService
 import io.github.waujito.messenger.api.chat.messages.RawMessage
 import io.github.waujito.messenger.api.exceptions.http.client.BadRequestException
@@ -24,13 +25,13 @@ class MessagesController(val chatRepository: ChatRepository, val messageService:
     }
 
     @PostMapping
-    fun sendMessage(@RequestBody content: String, @PathVariable("chatId") chatId: UUID, authentication: Authentication): ResponseEntity<Any?> {
+    fun sendMessage(@RequestBody content: String, @PathVariable("chatId") chatId: UUID, authentication: Authentication): ResponseEntity<Message> {
         val chat = chatRepository.getById(chatId)
         val user = authentication.principal as User
 
-        messageService.sendMessage(chat, user, content)
+        val message = messageService.sendMessage(chat, user, content)
 
-        return ResponseEntity(HttpStatus.CREATED)
+        return ResponseEntity(message, HttpStatus.CREATED)
     }
 
     @DeleteMapping("{messageId}")
@@ -46,7 +47,7 @@ class MessagesController(val chatRepository: ChatRepository, val messageService:
     }
 
     @PutMapping("{messageId}")
-    fun deleteMessage(@RequestBody content: String, @PathVariable("chatId") chatId: UUID, authentication: Authentication, @PathVariable("messageId") messageId: UUID): ResponseEntity<Any?> {
+    fun deleteMessage(@RequestBody content: String, @PathVariable("chatId") chatId: UUID, authentication: Authentication, @PathVariable("messageId") messageId: UUID): ResponseEntity<Message> {
         val message = messageService.getMessage(messageId)
 
         val user = authentication.principal as User
@@ -55,8 +56,8 @@ class MessagesController(val chatRepository: ChatRepository, val messageService:
         val chat = chatRepository.getById(chatId)
         if (!messageService.assertMessageChat(message, chat)) throw BadRequestException()
 
-        messageService.updateMessage(message, content)
+        val newMessage = messageService.updateMessage(message, content)
 
-        return ResponseEntity(HttpStatus.NO_CONTENT)
+        return ResponseEntity(newMessage, HttpStatus.NO_CONTENT)
     }
 }

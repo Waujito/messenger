@@ -43,7 +43,7 @@ class ChatController(val chatRepository: ChatRepository, val chatMembershipRepos
 
     @PostMapping(consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
     @Transactional
-    fun createChat(@RequestBody formData: MultiValueMap<String, String>, authentication: Authentication): ResponseEntity<Any?> {
+    fun createChat(@RequestBody formData: MultiValueMap<String, String>, authentication: Authentication): ResponseEntity<Chat> {
         val user = authentication.principal as User
 
         val chatName = formData.getFirst("name") ?: ""
@@ -51,6 +51,6 @@ class ChatController(val chatRepository: ChatRepository, val chatMembershipRepos
         val chat = chatRepository.save(Chat(chatName))
         val chatMembership = chatMembershipRepository.save(ChatMembership(user.id, chat))
 
-        return ResponseEntity(HttpStatus.CREATED)
+        return ResponseEntity(chat, HttpStatus.CREATED)
     }
 }
