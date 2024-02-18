@@ -39,6 +39,9 @@ loadChats(user.value)
   height: 100%;
   width: 100%;
 
+  background-color: $bg-chat;
+  color: $cl-func;
+
   .chatList {
     display: flex;
     flex-direction: row;

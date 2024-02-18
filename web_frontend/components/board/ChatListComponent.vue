@@ -32,9 +32,25 @@ const emits = defineEmits<{
 
   width: 100%;
 
+  background-color: $bg-func;
+  color: $cl-func;
+
+  padding: 10px 0;
+
   .chatUnit {
     width: 100%;
     height: 40px;
+
+    display: flex;
+    align-items: center;
+
+    padding: 5px 10px;
+    cursor: pointer;
+    user-select: none;
+
+    &:hover {
+      background-color: $dark-hov0;
+    }
   }
 }
 </style>
