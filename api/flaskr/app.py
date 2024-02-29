@@ -1,7 +1,8 @@
 import os
 from flask import Flask
 from . import default_config
-from .db import db
+from .db import db, init_db, init_db_command
+from .errorHandlers import register_errorhandlers
 
 import logging
 
@@ -31,14 +32,23 @@ def create_app(config: dict | str | None = None):
 
 
 def setup_app(app: Flask):
+    db.init_app(app)
+
+    app.cli.add_command(init_db_command)
+
     logging.basicConfig()
 
     if app.debug:
         logging.getLogger('sqlalchemy.engine').setLevel(logging.DEBUG)
         logging.getLogger('sqlalchemy.pool').setLevel(logging.DEBUG)
         logging.getLogger('sqlalchemy.orm').setLevel(logging.DEBUG)
+        with app.app_context():
+            init_db()
 
-    db.init_app(app)
+    from .auth import auth  # noqa
+    app.register_blueprint(auth)
 
-    with app.app_context():
-        db.create_all()
+    from .api import api  # noqa
+    app.register_blueprint(api)
+
+    register_errorhandlers(app)

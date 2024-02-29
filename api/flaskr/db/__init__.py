@@ -1,6 +1,8 @@
 import sqlalchemy as sa
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
+from flask import current_app
+import click
 
 
 class Base(DeclarativeBase):
@@ -11,3 +13,14 @@ db = SQLAlchemy(model_class=Base)
 Model: type[Base] = db.Model  # type: ignore
 
 from . import models  # noqa
+
+
+def init_db():
+    with current_app.app_context():
+        db.create_all()
+
+
+@click.command("init-db")
+def init_db_command():
+    init_db()
+    print("The database initialized.")

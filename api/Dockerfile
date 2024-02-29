@@ -1,18 +1,22 @@
 FROM python:3.11-alpine as bulid
 
-COPY flaskr flaskr
+WORKDIR /app/
+
+RUN python -m venv /opt/venv
+# Enable venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+RUN pip install build
 COPY requirements.txt .
 COPY pyproject.toml .
 
-# RUN pip install -r requirements.txt
+COPY flaskr flaskr
 
-RUN pip install build
 RUN python -m build --wheel
 
 RUN mkdir /prj
 
 RUN cp dist/$(ls dist | head -1) /prj/
-RUN ls /prj && sleep 2
 
 FROM python:3.11-alpine as prod
 
@@ -23,4 +27,4 @@ COPY --from=bulid /prj/* /prj/
 
 RUN pip install /prj/$(ls /prj)
 
-ENTRYPOINT [ "waitress-serve",  "--call", "messenger_api:create_app" ]
+ENTRYPOINT [ "waitress-serve",  "--call", "flaskr:create_app" ]
