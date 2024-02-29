@@ -1,0 +1,10 @@
+[project]
+name="flaskr"
+version="0.0.1"
+dynamic = ["dependencies"]
+
+[tool.setuptools]
+packages = ["flaskr"]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
