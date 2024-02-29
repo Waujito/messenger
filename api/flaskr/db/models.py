@@ -29,7 +29,8 @@ class User(TimestampMixin, Model):
     def __eq__(self, __value: object) -> bool:
         if isinstance(__value, User):
             return self.id == __value.id
-        else: return super().__eq__(__value)
+        else:
+            return super().__eq__(__value)
 
 
 class ChatMembership(TimestampMixin, Model):
@@ -90,7 +91,7 @@ class Message(TimestampMixin, Model):
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    content: Mapped[int] = mapped_column(Text(4096))
+    content: Mapped[int] = mapped_column(Text)
 
     chat_id: Mapped[int] = mapped_column(
         ForeignKey("chats.id", ondelete="CASCADE"))
@@ -101,7 +102,6 @@ class Message(TimestampMixin, Model):
     )
     author: Mapped[User] = relationship(
         back_populates="messages", lazy="joined")
-    
 
     messages_order_index = Index("m_o_idx", )
 

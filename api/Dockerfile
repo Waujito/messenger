@@ -1,4 +1,9 @@
-FROM python:3.11-alpine as bulid
+FROM condaforge/mambaforge as env
+ARG DEBIAN_FRONTEND=noninteractive
+
+RUN apt update -y && apt upgrade -y 
+
+FROM env as build
 
 WORKDIR /app/
 
@@ -28,3 +33,9 @@ COPY --from=bulid /prj/* /prj/
 RUN pip install /prj/$(ls /prj)
 
 ENTRYPOINT [ "waitress-serve",  "--call", "flaskr:create_app" ]
+
+FROM env as dev
+RUN conda create -n cenv python=3.11
+
+COPY requirements.txt .
+RUN conda run --no-capture-output -n cenv pip install -Ur requirements.txt
