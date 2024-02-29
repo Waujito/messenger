@@ -6,6 +6,9 @@ from .errorHandlers import register_errorhandlers
 
 import logging
 
+from .api import api
+from .auth import auth
+
 
 def create_app(config: dict | str | None = None):
     app = Flask(__name__)
@@ -33,6 +36,9 @@ def create_app(config: dict | str | None = None):
 
 def setup_app(app: Flask):
     db.init_app(app)
+    register_errorhandlers(app)
+    app.register_blueprint(auth)
+    app.register_blueprint(api)
 
     app.cli.add_command(init_db_command)
 
@@ -44,11 +50,3 @@ def setup_app(app: Flask):
         logging.getLogger('sqlalchemy.orm').setLevel(logging.DEBUG)
         with app.app_context():
             init_db()
-
-    from .auth import auth  # noqa
-    app.register_blueprint(auth)
-
-    from .api import api  # noqa
-    app.register_blueprint(api)
-
-    register_errorhandlers(app)
