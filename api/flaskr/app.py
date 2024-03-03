@@ -3,10 +3,11 @@ from flask import Flask
 from . import default_config
 from .db import db, init_db, init_db_command
 from .errorHandlers import register_errorhandlers
+from flask_cors import CORS
 
 import logging
 
-from .api import api
+from .messagingAPI import api as messagingAPI
 from .auth import auth
 
 
@@ -35,10 +36,13 @@ def create_app(config: dict | str | None = None):
 
 
 def setup_app(app: Flask):
-    db.init_app(app)
+    CORS(app)
     register_errorhandlers(app)
+
+    db.init_app(app)
+
     app.register_blueprint(auth)
-    app.register_blueprint(api)
+    app.register_blueprint(messagingAPI)
 
     app.cli.add_command(init_db_command)
 

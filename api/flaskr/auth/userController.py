@@ -88,6 +88,10 @@ def login():
 
 
 def authorize_user(scope: str | None = None):
+    # OPTIONS requests should be open
+    if request.method == 'OPTIONS':
+        return None, None
+
     authorization = request.authorization
 
     if authorization is None:

@@ -1,7 +1,7 @@
 import type { Chat } from "~/types/chat";
 import type { Message } from "~/types/message";
 import type { ReadyUser } from "~/types/user";
-import { getAuthorizedMessagingApi } from "../microservices/apis";
+import { getAuthorizedApi } from "../api";
 
 export const nonBlankRegex = /(.|\s)*\S(.|\s)*/;
 
@@ -9,7 +9,7 @@ export async function loadChatHistory(
   chat: Chat,
   user: ReadyUser
 ): Promise<Message[]> {
-  const api = getAuthorizedMessagingApi(user);
+  const api = getAuthorizedApi(user);
 
   const messageHistoryResponse = await api.get(`/chats/${chat.id}/messages`);
 
@@ -24,7 +24,7 @@ export async function sendMessage(
   chat: Chat,
   user: ReadyUser
 ): Promise<Message> {
-  const api = getAuthorizedMessagingApi(user);
+  const api = getAuthorizedApi(user);
 
   const response = await api.post(`/chats/${chat.id}/messages`, content, {
     headers: {

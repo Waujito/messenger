@@ -3,14 +3,21 @@ import axios, {
   type AxiosInstance,
   type CreateAxiosDefaults,
 } from "axios";
-import { API_URL } from "../app";
+import { API_URL } from "./app";
+import type { JWT, ReadyUser } from "~/types/user";
 
 /**
  * Defines an error handler for axios
  */
 export function defaulErrorHandler(error: AxiosError) {
   console.error(`Axios error: ${error.message}`);
-  console.error(error);
+
+  // @ts-expect-error Problems with axios data type detection. Description puts by api automatically.
+  const error_desc = error.response?.data?.description;
+
+  if (error_desc) {
+    error.message = error_desc;
+  }
 
   throw error;
 }
@@ -36,4 +43,19 @@ export function getAxiosInstance(baseURL: string): AxiosInstance {
   api.interceptors.response.use((r) => r, defaulErrorHandler);
 
   return api;
+}
+
+export function getApi() {
+  return getAxiosInstance(API_URL());
+}
+export function getAuthorizedApi(authorization: ReadyUser | JWT) {
+  const token =
+    "token" in authorization && "username" in authorization
+      ? authorization.token
+      : authorization;
+
+  const apiAxios = getApi();
+  apiAxios.defaults.headers.common.Authorization = `Bearer ${token.rawToken}`;
+
+  return apiAxios;
 }

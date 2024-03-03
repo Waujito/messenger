@@ -13,12 +13,17 @@ export type JWT = {
 
 export type StatedUser = { state: "unauthenticated" | "loading" };
 
+export type Author = {
+  id: string;
+  username: string;
+  avatar?: string;
+  created_at: string;
+  updated_at?: string;
+};
+
 export type ReadyUser = {
   state: "ready";
-  id: string;
-  name: string;
-  avatar?: string;
   token: JWT;
-};
+} & Author;
 
 export type User = StatedUser | ReadyUser;

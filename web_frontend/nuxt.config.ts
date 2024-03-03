@@ -18,9 +18,7 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      authorizationServerURL: "",
       apiURL: "",
-      clientId: "",
     },
   },
 });

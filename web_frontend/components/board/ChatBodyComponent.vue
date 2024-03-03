@@ -53,9 +53,9 @@ async function sendMessage() {
   if (nonBlankRegex.test(messageContent.value)) {
     const newMessage: Message = reactive({
       id: "",
-      authorId: user.value.id,
+      author: user.value,
       content: messageContent.value,
-      createdAt: "now",
+      created_at: "now",
     });
 
     messageHistory.value?.push(newMessage);
@@ -128,12 +128,12 @@ function focusToTextarea() {
           :key="message.id"
           ref="messageHistoryElem"
         >
-          <div :class="$style.messageAuthor">{{ message.authorId }}</div>
+          <div :class="$style.messageAuthor">{{ message.author.username }}</div>
           <div :class="$style.messageContent">
             {{ message.content }}
           </div>
           <div :class="$style.timestamps">
-            {{ message.createdAt }} {{ message.updatedAt ? "(updated)" : "" }}
+            {{ message.created_at }} {{ message.updated_at ? "(updated)" : "" }}
           </div>
         </div>
       </div>
