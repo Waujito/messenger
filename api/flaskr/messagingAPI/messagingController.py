@@ -13,9 +13,9 @@ import re
 
 nonBlankRegex = re.compile(r'(.|\s)*\S(.|\s)*')
 
+
 def get_user() -> User:
     return request.user  # type: ignore
-
 
 
 @api.route("/chats/<int:chat_id>/messages", methods=["POST"])
@@ -28,30 +28,31 @@ def send_message(chat_id: int):
 
     if not nonBlankRegex.match(message_content):
         raise BadRequest()
-    
-    message = Message(content=message_content, chat_id = chat_id, author_id=user.id)
+
+    message = Message(content=message_content,
+                      chat_id=chat_id, author_id=user.id)
 
     db.session.add(message)
     db.session.commit()
 
     return jsonify(message.to_json()), 201
 
+
 @api.route("/chats/<int:chat_id>/messages", methods=["GET"])
 def get_chat_messages(chat_id: int):
     user = get_user()
 
+    print(chat_id)
+
     chat, membership = ensure_membership(chat_id, user.id)
 
-    messages = db.session.scalars(
-        select(Message).where(Chat.id == chat_id).order_by(
-            Message.created_at.desc()
-        )
-    ).all()
+    messages = chat.messages
 
-    return jsonify(list(map(lambda x: x.to_json(), messages))) #todo: add paging
+    # todo: add paging
+    return jsonify(list(map(lambda x: x.to_json(), messages)))
 
 
-@api.route("/chats/<int:chat_id>/messages/<int:message_id>", methods=["PUT","DELETE"])
+@api.route("/chats/<int:chat_id>/messages/<int:message_id>", methods=["PUT", "DELETE"])
 def manageMessage(chat_id, message_id):
     user = get_user()
 
@@ -64,7 +65,7 @@ def manageMessage(chat_id, message_id):
         # Only author and chat owner may delete messages
         if not (message.author == user or user == chat.owner):
             raise Forbidden()
-        
+
         db.session.delete(message)
         db.session.commit()
 
@@ -78,16 +79,11 @@ def manageMessage(chat_id, message_id):
 
         if not nonBlankRegex.match(message_content):
             raise BadRequest()
-        
-        message.content = message_content #type: ignore
+
+        message.content = message_content  # type: ignore
 
         db.session.commit()
 
         return jsonify(message.to_json())
-    else: raise MethodNotAllowed()
-
-    
-
-
-
-
+    else:
+        raise MethodNotAllowed()

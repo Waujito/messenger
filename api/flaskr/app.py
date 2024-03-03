@@ -46,11 +46,6 @@ def setup_app(app: Flask):
 
     app.cli.add_command(init_db_command)
 
-    logging.basicConfig()
-
     if app.debug:
-        logging.getLogger('sqlalchemy.engine').setLevel(logging.DEBUG)
-        logging.getLogger('sqlalchemy.pool').setLevel(logging.DEBUG)
-        logging.getLogger('sqlalchemy.orm').setLevel(logging.DEBUG)
         with app.app_context():
             init_db()
