@@ -42,11 +42,11 @@ def send_message(chat_id: int):
 def get_chat_messages(chat_id: int):
     user = get_user()
 
-    print(chat_id)
-
     chat, membership = ensure_membership(chat_id, user.id)
 
-    messages = chat.messages
+    # messages = chat.messages
+    messages = db.session.scalars(select(Message).where(
+        Message.chat_id == chat_id).order_by(Message.created_at.desc()))
 
     # todo: add paging
     return jsonify(list(map(lambda x: x.to_json(), messages)))
