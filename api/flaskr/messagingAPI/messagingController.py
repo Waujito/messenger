@@ -11,7 +11,7 @@ from ..auth.usersService import get_user as get_member, get_user_or_error as get
 from .messagesService import get_message_or_error
 import re
 
-nonBlankRegex = re.compile(r'(.|\s)*\S(.|\s)*')
+blankRegex = re.compile(r'^\s*$')
 
 
 def get_user() -> User:
@@ -26,8 +26,8 @@ def send_message(chat_id: int):
 
     message_content = request.data.decode()
 
-    if not nonBlankRegex.match(message_content):
-        raise BadRequest()
+    if blankRegex.match(message_content):
+        raise BadRequest("Message cannot be empty.")
 
     message = Message(content=message_content,
                       chat_id=chat_id, author_id=user.id)
@@ -77,8 +77,8 @@ def manageMessage(chat_id, message_id):
 
         message_content = request.data.decode()
 
-        if not nonBlankRegex.match(message_content):
-            raise BadRequest()
+        if blankRegex.match(message_content):
+            raise BadRequest("Message cannot be empty.")
 
         message.content = message_content  # type: ignore
 
