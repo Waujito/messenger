@@ -29,6 +29,8 @@ function scrollToLastMessage(smooth: boolean = false) {
 
 function tryLoadHistory() {
   if (chat.value) {
+    messageHistory.value = undefined;
+
     loadChatHistory(chat.value, user.value)
       .then((h) => {
         messageHistory.value = h;
@@ -37,7 +39,7 @@ function tryLoadHistory() {
       .catch((err) => {
         throw err;
       });
-  } else messageHistory.value = undefined;
+  }
 }
 
 tryLoadHistory();
@@ -122,18 +124,23 @@ function focusToTextarea() {
         {{ chat.name }}
       </div>
       <div :class="$style.messageHistory">
-        <div
-          :class="$style.message"
-          v-for="message in messageHistory"
-          :key="message.id"
-          ref="messageHistoryElem"
-        >
-          <div :class="$style.messageAuthor">{{ message.author.username }}</div>
-          <div :class="$style.messageContent">
-            {{ message.content }}
-          </div>
-          <div :class="$style.timestamps">
-            {{ message.created_at }} {{ message.updated_at ? "(updated)" : "" }}
+        <div v-if="messageHistory">
+          <div
+            :class="$style.message"
+            v-for="message in messageHistory"
+            :key="message.id"
+            ref="messageHistoryElem"
+          >
+            <div :class="$style.messageAuthor">
+              {{ message.author.username }}
+            </div>
+            <div :class="$style.messageContent">
+              {{ message.content }}
+            </div>
+            <div :class="$style.timestamps">
+              {{ message.created_at }}
+              {{ message.updated_at ? "(updated)" : "" }}
+            </div>
           </div>
         </div>
       </div>
