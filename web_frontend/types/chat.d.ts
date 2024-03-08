@@ -4,13 +4,7 @@ export type Chat = {
   icon?: string;
   createdAt?: string;
   updatedAt?: string;
-};
-
-export type ApiChat = {
-  id: string;
-  name: string;
-  createdAt: string;
-  updatedAt: string;
+  owner_id: string;
 };
 
 export type ApiChatMembership = {

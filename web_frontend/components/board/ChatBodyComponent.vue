@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import type { Chat } from "~/types/chat";
-import type { Message } from "~/types/message";
+import type { Message, MessageContent } from "~/types/message";
+import { loadChatHistory } from "~/helpers/messagingApi/messagesManagement";
 import {
-  loadChatHistory,
-  nonBlankRegex,
+  sendMessage as apiSendMessage,
+  deleteMessage as apiDeleteMessage,
+  editMessage as apiEditMessage,
 } from "~/helpers/messagingApi/messagesManagement";
-import { sendMessage as apiSendMessage } from "~/helpers/messagingApi/messagesManagement";
+import MessageComponent from "./MessageComponent.vue";
+import SendMessageComponent from "./SendMessageComponent.vue";
 
 const props = defineProps<{
   chat: Chat | undefined;
@@ -17,16 +20,20 @@ const userStore = useUserStore();
 const user = userStore.readyUser;
 
 const messageHistory: Ref<Message[] | undefined> = ref();
+const renderedMessageHistory = computed(() =>
+  messageHistory.value?.filter((message) => message.state != "hidden")
+);
 
 const messageHistoryElem: Ref<HTMLDivElement[] | undefined> = ref();
 
 function scrollToLastMessage(smooth: boolean = false) {
-  if (messageHistoryElem.value)
+  console.log(messageHistory.value);
+  if (messageHistoryElem.value && messageHistoryElem.value.length > 0)
     messageHistoryElem.value[
       messageHistoryElem.value.length - 1
     ].scrollIntoView(smooth ? { behavior: "smooth" } : {});
 }
-
+// todo: Add paging
 function tryLoadHistory() {
   if (chat.value) {
     messageHistory.value = undefined;
@@ -48,72 +55,82 @@ watch(chat, async (newChat, oldChat) => {
   tryLoadHistory();
 });
 
-const messageContent: Ref<string> = ref("");
+const messageSender = ref<InstanceType<typeof SendMessageComponent> | null>(
+  null
+);
 
-async function sendMessage() {
-  if (!chat.value || !messageContent.value) return;
-  if (nonBlankRegex.test(messageContent.value)) {
-    const newMessage: Message = reactive({
-      id: "",
-      author: user.value,
-      content: messageContent.value,
-      created_at: "now",
-    });
+function messageEditFlow(message: Message) {
+  messageSender.value?.messageEditFlow(message);
+}
 
-    messageHistory.value?.push(newMessage);
+async function sendMessage(messageContent: MessageContent) {
+  messageContent = messageContent.trim();
+  if (!chat.value || !messageContent || !messageHistory.value) return;
 
-    const sentMessagePromise = apiSendMessage(
-      messageContent.value,
-      chat.value,
-      user.value
-    );
+  const newMessage: Message = reactive({
+    id: "",
+    author: user.value,
+    content: messageContent,
+    created_at: "now",
+    privileges: "author",
+    state: "pending",
+  });
 
-    messageContent.value = "";
+  messageHistory.value.push(newMessage);
+  nextTick(() => scrollToLastMessage(true));
 
-    nextTick(() => {
-      updateTextareaHeight();
-      scrollToLastMessage(true);
-    });
+  const sentMessagePromise = apiSendMessage(
+    messageContent,
+    chat.value,
+    user.value
+  );
 
-    const sentMessage = await sentMessagePromise;
+  let sentMessage = newMessage;
+  try {
+    sentMessage = await sentMessagePromise;
+  } catch {
+    newMessage.state = "postingError";
+  }
 
-    for (const key in sentMessage) {
+  for (const key in newMessage) {
+    if (key in sentMessage) {
       // @ts-expect-error Typescript cannot normally operate with keys object mapping
       newMessage[key] = sentMessage[key];
+    } else {
+      // @ts-expect-error Typescript cannot normally operate with keys object mapping
+      newMessage[key] = undefined;
     }
-  } else {
-    messageContent.value = "";
-
-    nextTick(() => {
-      updateTextareaHeight();
-      scrollToLastMessage(true);
-    });
   }
 }
 
-const textareaField: Ref<HTMLTextAreaElement | undefined> = ref();
-const textareaMaxHeight = 200;
-const textareaHeight = ref<number>(19);
+async function editMessage(messageContent: MessageContent, message: Message) {
+  messageContent = messageContent.trim();
 
-function updateTextareaHeight() {
-  if (!textareaField.value) return;
+  if (!chat.value || !message || !messageContent) return;
 
-  textareaField.value.style.height = "0";
+  const oldContent = message.content;
+  const wasUpdated = message.updated_at;
+  message.content = messageContent;
+  message.updated_at = "now";
 
-  textareaHeight.value = Math.min(
-    textareaField.value.scrollHeight,
-    textareaMaxHeight
-  );
-
-  textareaField.value.style.height = textareaHeight.value + "px";
+  try {
+    await apiEditMessage(messageContent, message, chat.value, user.value);
+  } catch {
+    message.content = oldContent;
+    message.updated_at = wasUpdated;
+  }
 }
 
-onMounted(() => nextTick(updateTextareaHeight));
+async function deleteMessage(message: Message) {
+  if (!chat.value) return;
 
-function focusToTextarea() {
-  if (!textareaField.value) return;
+  message.state = "hidden";
 
-  textareaField.value.focus();
+  try {
+    await apiDeleteMessage(message, chat.value, user.value);
+  } catch {
+    console.log("Could'nt delete message.");
+  }
 }
 </script>
 
@@ -123,45 +140,25 @@ function focusToTextarea() {
       <div :class="$style.head">
         {{ chat.name }}
       </div>
-      <div :class="$style.messageHistory">
-        <div v-if="messageHistory">
-          <div
-            :class="$style.message"
-            v-for="message in messageHistory"
-            :key="message.id"
-            ref="messageHistoryElem"
-          >
-            <div :class="$style.messageAuthor">
-              {{ message.author.username }}
-            </div>
-            <div :class="$style.messageContent">
-              {{ message.content }}
-            </div>
-            <div :class="$style.timestamps">
-              {{ message.created_at }}
-              {{ message.updated_at ? "(updated)" : "" }}
-            </div>
-          </div>
+      <div :class="$style.messageHistory" v-if="messageHistory">
+        <div
+          :class="$style.message"
+          v-for="message in renderedMessageHistory"
+          :key="message.id"
+          ref="messageHistoryElem"
+        >
+          <MessageComponent
+            :message="message"
+            @delete-message="deleteMessage"
+            @edit-message="messageEditFlow"
+          />
         </div>
       </div>
-      <div :class="$style.sendMessage" @click="focusToTextarea">
-        <div :class="$style.messageContentWrapper">
-          <textarea
-            :class="$style.messageContent"
-            :style="{ height: textareaHeight + 'px' }"
-            v-model="messageContent"
-            ref="textareaField"
-            @input="updateTextareaHeight"
-            @keypress.enter.exact="
-              (e) => {
-                e.preventDefault();
-                sendMessage();
-              }
-            "
-          ></textarea>
-        </div>
-        <div :class="$style.messageSendButton" @click="sendMessage">Send</div>
-      </div>
+      <SendMessageComponent
+        @send-message="sendMessage"
+        @edit-message="editMessage"
+        ref="messageSender"
+      />
     </div>
     <div :class="$style.noChatBody" v-else>Nothing here</div>
   </div>
@@ -212,71 +209,8 @@ function focusToTextarea() {
     padding: 10px 20px;
 
     .message {
-      display: flex;
-      flex-direction: column;
-      margin: 5px 0;
-      padding: 8px 8px;
-
-      border-radius: 10px;
-
-      background-color: $bg-message;
-
       max-width: 70%;
-      .messageContent {
-        margin-top: 5px;
-        white-space: pre-wrap;
-      }
-
-      .timestamps {
-        margin-top: 5px;
-        text-align: end;
-      }
-    }
-  }
-  .sendMessage {
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-
-    background-color: $bg-func;
-    color: $cl-func;
-
-    border-left: 2px solid $bg-message;
-
-    .messageContentWrapper {
-      min-height: 40px;
-      flex-grow: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      padding: 10px;
-      .messageContent {
-        resize: none;
-        flex-grow: 1;
-
-        background-color: inherit;
-        color: inherit;
-      }
-    }
-
-    .messageSendButton {
-      padding: 10px;
-      display: flex;
-
-      text-align: center;
-      align-items: center;
-      justify-content: center;
-
-      background-color: inherit;
-      color: inherit;
-
-      cursor: pointer;
-      user-select: none;
-
-      &:hover {
-        background-color: $hov-func;
-      }
+      margin: 5px 0;
     }
   }
 }
