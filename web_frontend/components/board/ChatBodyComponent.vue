@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import type { Chat } from "~/types/chat";
 import type { Message, MessageContent } from "~/types/message";
-import { loadChatHistory } from "~/helpers/messagingApi/messagesManagement";
+
+import { ChatHistory } from "~/helpers/messagingApi/messageHistory";
+
 import {
   sendMessage as apiSendMessage,
   deleteMessage as apiDeleteMessage,
@@ -19,40 +21,115 @@ const { chat } = toRefs(props);
 const userStore = useUserStore();
 const user = userStore.readyUser;
 
-const messageHistory: Ref<Message[] | undefined> = ref();
-const renderedMessageHistory = computed(() =>
-  messageHistory.value?.filter((message) => message.state != "hidden")
-);
+const messageHistory = ref<ChatHistory | null>(null);
+
+const windowSizeCap = ref<number>(50);
+
+const window: { start: number; size: number } = reactive({
+  start: 0,
+  size: windowSizeCap.value / 2,
+});
+
+const preventScroll = ref<boolean>(false);
+
+function lockScroll(t: number) {
+  preventScroll.value = true;
+  setTimeout(() => (preventScroll.value = false), t);
+}
+
+async function changeWindow(
+  start: number,
+  size: number = window.size,
+  historyView?: HTMLDivElement
+) {
+  const length = messageHistory.value?.history.length;
+  if (length === undefined) return;
+
+  let teleport_scrollbar: boolean = historyView?.scrollTop == 0;
+
+  if (start < 0) start = 0;
+  else if (length - (start + size) < 0)
+    if (await messageHistory.value?.shiftWindow(start, size))
+      await historyScroll();
+    else {
+      start = length - size;
+      teleport_scrollbar = false;
+    }
+
+  // Fixes scrollbar stack in 0.
+  if (teleport_scrollbar && historyView) historyView.scrollTop = 100;
+
+  window.start = start;
+  window.size = size;
+}
+
+const historyView: Ref<HTMLDivElement | undefined> = ref();
+
+async function historyScroll() {
+  if (!historyView.value) return;
+  if (preventScroll.value) return;
+
+  const scrollHeight = historyView.value.scrollHeight;
+  const scrollTop = historyView.value.scrollTop;
+
+  let start = window.start;
+  let size = window.size;
+
+  if (scrollTop < scrollHeight / 4) {
+    if (size != windowSizeCap.value)
+      size = Math.min(size + 20, windowSizeCap.value);
+    else start += (windowSizeCap.value / 4) | 0;
+  } else if (scrollTop > (4 * scrollHeight) / 5 && start != 0) {
+    start -= (windowSizeCap.value / 4) | 0;
+  }
+
+  changeWindow(start, size, historyView.value);
+}
+
+const renderedMessageHistory = computed(() => {
+  if (!messageHistory.value) return;
+
+  const length = messageHistory.value.history.length;
+
+  const start = length - (window.start + window.size);
+  const end = length - window.start;
+
+  return messageHistory.value.history
+    .slice(start, end)
+    .filter((message) => message.state != "hidden");
+});
 
 const messageHistoryElem: Ref<HTMLDivElement[] | undefined> = ref();
 
-function scrollToLastMessage(smooth: boolean = false) {
-  console.log(messageHistory.value);
+function scrollDown(smooth: boolean = false) {
   if (messageHistoryElem.value && messageHistoryElem.value.length > 0)
     messageHistoryElem.value[
       messageHistoryElem.value.length - 1
     ].scrollIntoView(smooth ? { behavior: "smooth" } : {});
 }
-// todo: Add paging
-function tryLoadHistory() {
-  if (chat.value) {
-    messageHistory.value = undefined;
 
-    loadChatHistory(chat.value, user.value)
-      .then((h) => {
-        messageHistory.value = h;
-        nextTick(scrollToLastMessage);
-      })
-      .catch((err) => {
-        throw err;
-      });
-  }
+async function scrollToLastMessage(smooth: boolean = false, noTimeout = false) {
+  preventScroll.value = true;
+  scrollDown(smooth);
+  await changeWindow(0);
+
+  lockScroll(1000);
+  if (noTimeout) scrollDown(smooth);
+  else setTimeout(() => scrollDown(smooth), noTimeout ? 0 : 80);
 }
 
-tryLoadHistory();
+async function initChat() {
+  if (!chat.value) return (messageHistory.value = null);
+
+  messageHistory.value = new ChatHistory(chat.value, user.value);
+  await messageHistory.value.loadHistory();
+  await scrollToLastMessage(false, true);
+}
+
+onMounted(() => initChat());
 
 watch(chat, async (newChat, oldChat) => {
-  tryLoadHistory();
+  initChat();
 });
 
 const messageSender = ref<InstanceType<typeof SendMessageComponent> | null>(
@@ -76,7 +153,7 @@ async function sendMessage(messageContent: MessageContent) {
     state: "pending",
   });
 
-  messageHistory.value.push(newMessage);
+  messageHistory.value.messageSent(newMessage);
   nextTick(() => scrollToLastMessage(true));
 
   const sentMessagePromise = apiSendMessage(
@@ -140,7 +217,12 @@ async function deleteMessage(message: Message) {
       <div :class="$style.head">
         {{ chat.name }}
       </div>
-      <div :class="$style.messageHistory" v-if="messageHistory">
+      <div
+        :class="$style.messageHistory"
+        v-if="messageHistory"
+        @scroll="historyScroll"
+        ref="historyView"
+      >
         <div
           :class="$style.message"
           v-for="message in renderedMessageHistory"

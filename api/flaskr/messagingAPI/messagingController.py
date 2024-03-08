@@ -44,11 +44,39 @@ def get_chat_messages(chat_id: int):
 
     chat, membership = ensure_membership(chat_id, user.id)
 
-    # messages = chat.messages
-    messages = db.session.scalars(select(Message).where(
-        Message.chat_id == chat_id).order_by(Message.created_at.desc()))
+    # From this index response array will be started,
+    # direction of starting (down or up) is determined according to `loadDirection` argument
+    startingIndex = int(request.args["startIdx"]
+                        ) if "startIdx" in request.args else -1
 
-    # todo: add paging
+    # Limits amount of message to load per each request. Internal maximum is 5000, default is 1000
+    messagesLimit = min(
+        int(request.args["limit"]), 5000) if "limit" in request.args else 1000
+
+    # Specifies the direction to pagination. -1 = goes down, from startingIndex to the last message
+    # 1 = from startingIndex to the earlies message, up to messagesLimit
+    loadDirection = - \
+        1 if "loadDirection" in request.args and request.args["loadDirection"] == "-1" else 1
+
+    query = select(Message).where(Message.chat_id == chat_id)
+
+    if startingIndex != -1:
+        if loadDirection == 1:
+            query = query.where(Message.id <= startingIndex)
+            query = query.order_by(Message.created_at.desc())
+        else:
+            query = query.where(Message.id >= startingIndex)
+            query = query.order_by(Message.created_at.asc())
+    else:
+        query = query.order_by(Message.created_at.desc())
+
+    query = query.limit(messagesLimit)
+
+    messages = db.session.scalars(query).all()
+
+    if startingIndex != -1 and loadDirection != 1:
+        messages = messages.__reversed__()
+
     return jsonify(list(map(lambda x: x.to_json(), messages)))
 
 

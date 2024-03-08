@@ -103,8 +103,6 @@ class Message(TimestampMixin, Model):
     author: Mapped[User] = relationship(
         back_populates="messages", lazy="joined")
 
-    messages_order_index = Index("m_o_idx", )
-
     def to_json(self):
         return {
             "id": self.id,

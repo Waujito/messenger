@@ -1,4 +1,4 @@
-import type { ApiChat, Chat } from "~/types/chat";
+import type { Chat } from "~/types/chat";
 import type { ReadyUser } from "~/types/user";
 import { getAuthorizedApi } from "../api";
 import type { ApiChatMembership } from "../../types/chat";
@@ -8,6 +8,6 @@ export async function loadChats(user: ReadyUser): Promise<Chat[]> {
 
   const chatsResponse = await api.get("/chats");
 
-  const chats = chatsResponse.data as ApiChat[];
+  const chats = chatsResponse.data as Chat[];
   return chats;
 }

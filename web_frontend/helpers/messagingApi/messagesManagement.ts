@@ -7,25 +7,6 @@ import type {
 import type { ReadyUser } from "~/types/user";
 import { getAuthorizedApi } from "../api";
 
-export async function loadChatHistory(
-  chat: Chat,
-  user: ReadyUser
-): Promise<Message[]> {
-  const api = getAuthorizedApi(user);
-
-  const messageHistoryResponse = await api.get(`/chats/${chat.id}/messages`);
-
-  const messageHistory = messageHistoryResponse.data as Message[];
-  messageHistory.reverse();
-
-  messageHistory.map(
-    (message) =>
-      (message.privileges = getMessagePrivileges(message, chat, user))
-  );
-
-  return messageHistory;
-}
-
 export function getMessagePrivileges(
   message: Message,
   chat: Chat,
