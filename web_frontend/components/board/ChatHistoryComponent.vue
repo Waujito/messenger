@@ -34,16 +34,19 @@ async function changeWindow(
   let teleport_scrollbar: boolean = historyView?.scrollTop == 0;
 
   if (start < 0) start = 0;
-  else if (length - (start + size) < 0)
-    if (await messageHistory.value.shiftWindow(start, size))
+  else if (length - (start + size) <= 0) {
+    if (await messageHistory.value.shiftWindow(start, size)) {
       await historyScroll();
-    else {
-      start = length - size;
+    } else {
+      start = Math.max(length - size, 0);
       teleport_scrollbar = false;
     }
+  }
 
   // Fixes scrollbar stuck in 0.
-  if (teleport_scrollbar && historyView) historyView.scrollTop = 100;
+  if (teleport_scrollbar && historyView) {
+    historyView.scrollTop = 100;
+  }
 
   window.start = start;
   window.size = size;
