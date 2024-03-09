@@ -148,7 +148,10 @@ onMounted(() => {
       ref="historyView"
     >
       <div
-        :class="$style.message"
+        :class="[
+          $style.message,
+          message.privileges == 'author' ? $style.self : undefined,
+        ]"
         v-for="message in renderedMessageHistory"
         :key="message.id"
         ref="messageElems"
@@ -196,7 +199,13 @@ onMounted(() => {
 
     .message {
       max-width: 70%;
+      min-width: 30%;
+      align-self: flex-start;
       margin: 5px 0;
+
+      &.self {
+        align-self: flex-end;
+      }
     }
   }
 

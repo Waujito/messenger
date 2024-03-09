@@ -85,6 +85,7 @@ async function sendMessage(messageContent: MessageContent) {
       newMessage[key] = undefined;
     }
   }
+  newMessage.privileges = "author";
 }
 
 async function editMessage(messageContent: MessageContent, message: Message) {
