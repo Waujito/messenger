@@ -87,7 +87,6 @@ export class ChatHistory {
    * @returns Boolean points to allow start point change or to not.
    */
   async shiftWindow(start: number, size: number): Promise<boolean> {
-    console.log("uwu");
     if (start + size > this.history.length) {
       if (this.upFilled) return false;
 
