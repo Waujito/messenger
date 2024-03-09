@@ -17,13 +17,6 @@ const window: { start: number; size: number } = reactive({
   size: windowSizeCap.value / 2,
 });
 
-const preventScroll = ref<boolean>(false);
-
-function lockScroll(t: number) {
-  preventScroll.value = true;
-  setTimeout(() => (preventScroll.value = false), t);
-}
-
 function scrollbarAtBottom(el: HTMLDivElement) {
   const sh = el.scrollHeight,
     st = el.scrollTop,
@@ -66,7 +59,6 @@ async function changeWindow(
   // Fixes scrollbar stuck in up and down.
   if (teleportScrollbar != -1 && historyView) {
     historyView.scrollTop = teleportScrollbar;
-    console.log(teleportScrollbar);
   }
 
   window.start = start;
@@ -80,7 +72,6 @@ const asdf = ref<number>(1);
 async function historyScroll() {
   asdf.value++;
   if (!historyView.value) return;
-  if (preventScroll.value) return;
 
   const scrollHeight = historyView.value.scrollHeight;
   const scrollTop = historyView.value.scrollTop;
