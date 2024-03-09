@@ -24,6 +24,17 @@ function lockScroll(t: number) {
   setTimeout(() => (preventScroll.value = false), t);
 }
 
+function scrollbarAtBottom(el: HTMLDivElement) {
+  const sh = el.scrollHeight,
+    st = el.scrollTop,
+    ht = el.offsetHeight;
+
+  return ht == 0 || Math.abs(st - (sh - ht)) < 10;
+}
+function scrollbarAtTop(el: HTMLDivElement) {
+  return el.scrollTop == 0;
+}
+
 async function changeWindow(
   start: number,
   size: number = window.size,
@@ -31,7 +42,14 @@ async function changeWindow(
 ) {
   const length = messageHistory.value.history.length;
 
-  let teleport_scrollbar: boolean = historyView?.scrollTop == 0;
+  // fixes scrollbar stuck in up and down
+  let teleportScrollbar: number = !historyView
+    ? -1
+    : scrollbarAtTop(historyView)
+      ? 100
+      : scrollbarAtBottom(historyView)
+        ? historyView.scrollTop - 500
+        : -1;
 
   if (start < 0) start = 0;
   else if (length - (start + size) <= 0) {
@@ -39,13 +57,16 @@ async function changeWindow(
       await historyScroll();
     } else {
       start = Math.max(length - size, 0);
-      teleport_scrollbar = false;
+      teleportScrollbar = -1;
     }
   }
 
-  // Fixes scrollbar stuck in 0.
-  if (teleport_scrollbar && historyView) {
-    historyView.scrollTop = 100;
+  if (start == 0 && teleportScrollbar != 100) teleportScrollbar = -1;
+
+  // Fixes scrollbar stuck in up and down.
+  if (teleportScrollbar != -1 && historyView) {
+    historyView.scrollTop = teleportScrollbar;
+    console.log(teleportScrollbar);
   }
 
   window.start = start;
@@ -55,7 +76,9 @@ async function changeWindow(
 const historyView: Ref<HTMLDivElement | undefined> = ref();
 const messageElems: Ref<HTMLDivElement[] | undefined> = ref();
 
+const asdf = ref<number>(1);
 async function historyScroll() {
+  asdf.value++;
   if (!historyView.value) return;
   if (preventScroll.value) return;
 
@@ -88,66 +111,149 @@ const renderedMessageHistory = computed(() => {
 });
 
 function scrollDown(smooth: boolean = false) {
-  if (messageElems.value && messageElems.value.length > 0)
-    messageElems.value[messageElems.value.length - 1].scrollIntoView(
-      smooth ? { behavior: "smooth" } : {}
-    );
+  if (historyView.value) {
+    historyView.value.scrollTo({
+      top: historyView.value.scrollHeight,
+      behavior: smooth ? "smooth" : "instant",
+    });
+  }
 }
 
-async function scrollToLastMessage(smooth: boolean = false, noTimeout = false) {
-  preventScroll.value = true;
-  scrollDown(smooth);
+async function scrollToLastMessage(smooth: boolean = false) {
   await changeWindow(0);
+  await nextTick();
 
-  lockScroll(1000);
-  if (noTimeout) scrollDown(smooth);
-  else setTimeout(() => scrollDown(smooth), noTimeout ? 0 : 80);
+  scrollDown(smooth);
 }
+
+const showArrow = computed<boolean>(() => {
+  asdf.value;
+  if (!historyView.value) return false;
+
+  if (
+    window.start == 0 &&
+    historyView.value.scrollTop >= historyView.value.scrollHeight - 1000
+  )
+    return false;
+
+  return true;
+});
 
 defineExpose({
   scrollToLastMessage,
 });
 
 onMounted(() => {
-  scrollToLastMessage(false, true);
+  scrollToLastMessage(false);
 });
 </script>
 
 <template>
-  <div
-    :class="$style.messageHistory"
-    v-if="messageHistory"
-    @scroll="historyScroll"
-    ref="historyView"
-  >
+  <div :class="$style.historyWrapper">
     <div
-      :class="$style.message"
-      v-for="message in renderedMessageHistory"
-      :key="message.id"
-      ref="messageElems"
+      :class="$style.messageHistory"
+      v-if="messageHistory"
+      @scroll="historyScroll"
+      ref="historyView"
     >
-      <MessageComponent
-        :message="message"
-        @delete-message="(message: Message) => $emit('deleteMessage', message)"
-        @edit-message="(message: Message) => $emit('editMessage', message)"
-      />
+      <div
+        :class="$style.message"
+        v-for="message in renderedMessageHistory"
+        :key="message.id"
+        ref="messageElems"
+      >
+        <MessageComponent
+          :message="message"
+          @delete-message="
+            (message: Message) => $emit('deleteMessage', message)
+          "
+          @edit-message="(message: Message) => $emit('editMessage', message)"
+        />
+      </div>
+    </div>
+    <div :class="$style.scrollDownWrapper">
+      <div
+        :class="$style.scrollDownArrow"
+        @click="
+          async () => {
+            await nextTick();
+            await scrollToLastMessage(true);
+          }
+        "
+        v-if="showArrow"
+      ></div>
     </div>
   </div>
 </template>
 
 <style module lang="scss">
-.messageHistory {
+.historyWrapper {
   display: flex;
   flex-direction: column;
-
-  overflow-y: scroll;
   height: 100%;
+  width: 100%;
+  overflow-y: hidden;
 
-  padding: 10px 20px;
+  .messageHistory {
+    display: flex;
+    flex-direction: column;
 
-  .message {
-    max-width: 70%;
-    margin: 5px 0;
+    overflow-y: scroll;
+    height: 100%;
+
+    padding: 10px 20px;
+
+    .message {
+      max-width: 70%;
+      margin: 5px 0;
+    }
+  }
+
+  .scrollDownWrapper {
+    width: 100%;
+    position: relative;
+
+    .scrollDownArrow {
+      height: 50px;
+      width: 50px;
+
+      background-color: $bg-func;
+      position: absolute;
+      border-radius: 100px;
+
+      right: 15px;
+      bottom: 20px;
+
+      cursor: pointer;
+
+      &:after {
+        display: inline-block;
+        content: "";
+        height: 3px;
+        width: 23px;
+
+        rotate: -35deg;
+        position: absolute;
+        bottom: 20px;
+        right: 5px;
+
+        background-color: $cl-ftext;
+        border-radius: 10px;
+      }
+      &:before {
+        display: inline-block;
+        content: "";
+        height: 3px;
+        width: 23px;
+        rotate: 35deg;
+        position: absolute;
+        bottom: 20px;
+        left: 5px;
+
+        background-color: $cl-ftext;
+        border-radius: 10px;
+      }
+    }
   }
 }
 </style>
