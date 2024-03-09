@@ -8,6 +8,8 @@ $dark-cl2: #ffffff;
 
 $dark-hov0: #343434;
 
+$dark-popupMask-cl: rgba(255, 255, 255, 0.1);
+
 $bg-func: $dark-bg0;
 $cl-func: $dark-cl1;
 $hov-func: $dark-hov0;
@@ -16,3 +18,67 @@ $bg-chat: $dark-bg1;
 
 $bg-message: $dark-bg2;
 $cl-message: $dark-cl2;
+
+$mask-color: $dark-popupMask-cl;
+
+$green_button_normal: #2c9f4b;
+$green_button_hover: #237e3b;
+$green_button_pressed: #1b612e;
+
+$darkblue_button_normal: #204ca1;
+$darkblue_button_hover: #1b3c80;
+$darkblue_button_pressed: #142e63;
+
+$lightblue_button_normal: #1e90ff;
+$lightblue_button_hover: #1980de;
+$lightblue_button_pressed: #1470bd;
+
+$red_button_normal: #a72a39;
+$red_button_hover: #95202e;
+$red_button_pressed: #711721;
+
+@mixin hover($color) {
+  transition: background-color 0.2 ease-out;
+
+  &:hover {
+    transition: background-color 0.2 ease-out;
+    background-color: $color;
+  }
+}
+
+@mixin button($normal_background, $hover_background, $press_background) {
+  background-color: $normal_background;
+  transition: background-color 0.2 ease-out;
+
+  user-select: none;
+  cursor: pointer;
+
+  &:hover {
+    transition: background-color 0.2 ease-out;
+    background-color: $hover_background;
+  }
+
+  &:active {
+    transition: background-color 0.2 ease-out;
+    background-color: $press_background;
+  }
+}
+
+%green_button {
+  @include button(
+    $green_button_normal,
+    $green_button_hover,
+    $green_button_pressed
+  );
+}
+%darkblue_button {
+  @include button(
+    $darkblue_button_normal,
+    $darkblue_button_hover,
+    $darkblue_button_pressed
+  );
+}
+
+%red_button {
+  @include button($red_button_normal, $red_button_hover, $red_button_pressed);
+}
