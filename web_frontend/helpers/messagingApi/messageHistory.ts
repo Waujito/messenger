@@ -64,14 +64,14 @@ export class ChatHistory {
     );
 
     if (args.loadDirection == "up") {
+      if (preHistory.length < limit) this.upFilled = true;
+
       if (this.history.length !== 0)
         while (
           preHistory.length &&
           preHistory[preHistory.length - 1].id >= this.history[0].id
         )
           preHistory.pop();
-
-      if (preHistory.length === 0) return (this.upFilled = true) && undefined;
 
       this.history.unshift(...preHistory);
     } else {
