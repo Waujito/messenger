@@ -109,7 +109,6 @@ defineExpose({
 });
 
 onMounted(() => {
-  console.log("mounted");
   scrollToLastMessage(false, true);
 });
 </script>
