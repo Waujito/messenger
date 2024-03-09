@@ -19,25 +19,27 @@ function chatCreated(chat: Chat) {
 
 <template>
   <div :class="$style.chatList">
-    <div
-      :class="[
-        $style.chatUnit,
-        activeChat?.id == chat.id ? $style.activeChat : undefined,
-      ]"
-      v-for="chat of chatList"
-      :key="chat.id"
-      @click="() => emits('chatSelected', chat)"
-    >
-      {{ chat.name }}
+    <div>
+      <div
+        :class="[
+          $style.chatUnit,
+          activeChat?.id == chat.id ? $style.activeChat : undefined,
+        ]"
+        v-for="chat of chatList"
+        :key="chat.id"
+        @click="() => emits('chatSelected', chat)"
+      >
+        {{ chat.name }}
+      </div>
+      <div :class="$style.createChat" @click="showCreatePrompt = true">
+        Create Chat
+      </div>
+      <BoardChatCreateComponent
+        v-if="showCreatePrompt"
+        @close="showCreatePrompt = false"
+        @chat-created="chatCreated"
+      />
     </div>
-    <div :class="$style.createChat" @click="showCreatePrompt = true">
-      Create Chat
-    </div>
-    <BoardChatCreateComponent
-      v-if="showCreatePrompt"
-      @close="showCreatePrompt = false"
-      @chat-created="chatCreated"
-    />
   </div>
 </template>
 
@@ -47,7 +49,7 @@ function chatCreated(chat: Chat) {
   flex-direction: column;
 
   height: 100%;
-  overflow-y: scroll;
+  overflow-y: auto;
 
   width: 100%;
 

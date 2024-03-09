@@ -13,7 +13,7 @@ const chatName = ref<string>("");
 const loading = ref<boolean>(false);
 
 async function createChat() {
-  if (loading) return;
+  if (loading.value) return;
 
   try {
     const name = chatName.value.trim();
@@ -25,6 +25,7 @@ async function createChat() {
 
     const createdChat = await apiCreateChat(user.value, data);
     emit("chatCreated", createdChat);
+    loading.value = true;
     emit("close");
   } catch (e) {
     if (e instanceof Error) alert(e.message);
