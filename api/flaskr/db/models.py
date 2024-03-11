@@ -114,3 +114,23 @@ class Message(TimestampMixin, Model):
 
     def __eq__(self, __value: type["Message"]) -> bool:
         return self.id == __value.id
+
+
+class ChatInvite(TimestampMixin, Model):
+    __tablename__ = "chatInvites"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    code: Mapped[str] = mapped_column(String(255))
+
+    chat_id: Mapped[int] = mapped_column(
+        ForeignKey("chats.id", ondelete="CASCADE")
+    )
+    chat: Mapped[Chat] = relationship(lazy="joined")
+
+    def to_json(self):
+        return {
+            "id": self.id,
+            "code": self.code,
+            "chat_id": self.chat_id,
+            "created_at": self.created_at
+        }

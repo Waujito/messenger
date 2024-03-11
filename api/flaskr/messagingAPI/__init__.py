@@ -13,4 +13,4 @@ def authorize_mdl():
 
 api.before_request(authorize_mdl)
 
-from . import chatsController, chatsMembershipController, messagingController  # noqa
+from . import chatMembershipController, chatsController, messagingController  # noqa
