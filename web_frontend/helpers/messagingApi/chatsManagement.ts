@@ -13,12 +13,26 @@ export async function loadChats(user: ReadyUser): Promise<Chat[]> {
 }
 
 export async function createChat(
-  user: ReadyUser,
-  chatInfo: ChatCreateData
+  chatInfo: ChatCreateData,
+  user: ReadyUser
 ): Promise<Chat> {
   const api = getAuthorizedApi(user);
 
   const response = await api.post("/chats", chatInfo);
+
+  const chat = response.data as ApiChat;
+
+  return chat;
+}
+
+export async function joinChat(
+  inviteLink: string,
+  user: ReadyUser
+): Promise<Chat> {
+  const api = getAuthorizedApi(user);
+
+  const inviteCode = inviteLink;
+  const response = await api.post(`/invite?code=${inviteCode}`);
 
   const chat = response.data as ApiChat;
 

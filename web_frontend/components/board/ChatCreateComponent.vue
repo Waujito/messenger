@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import { createChat as apiCreateChat } from "~/helpers/messagingApi/chatsManagement";
+import {
+  createChat as apiCreateChat,
+  joinChat as apiJoinChat,
+} from "~/helpers/messagingApi/chatsManagement";
 import type { Chat, ChatCreateData } from "~/types/chat";
 const userStore = useUserStore();
 const user = userStore.readyUser;
@@ -10,6 +13,7 @@ const emit = defineEmits<{
 }>();
 
 const chatName = ref<string>("");
+const inviteLink = ref<string>("");
 const loading = ref<boolean>(false);
 
 async function createChat() {
@@ -23,8 +27,22 @@ async function createChat() {
       name,
     };
 
-    const createdChat = await apiCreateChat(user.value, data);
+    const createdChat = await apiCreateChat(data, user.value);
     emit("chatCreated", createdChat);
+    loading.value = true;
+    emit("close");
+  } catch (e) {
+    if (e instanceof Error) alert(e.message);
+  }
+}
+async function joinChat() {
+  if (loading.value) return;
+
+  try {
+    if (!inviteLink.value) return alert("Invite link cannot be null");
+
+    const joinedChat = await apiJoinChat(inviteLink.value, user.value);
+    emit("chatCreated", joinedChat);
     loading.value = true;
     emit("close");
   } catch (e) {
@@ -36,14 +54,26 @@ async function createChat() {
 <template>
   <div :class="$style.mask">
     <div :class="$style.window">
-      <h1>Create chat</h1>
-      <div :class="$style.inputField">
-        <h3>Enter chat name:</h3>
-        <input :class="$style.inputName" v-model="chatName" />
+      <div :class="$style.chatCreation">
+        <h1>Create chat</h1>
+        <div :class="$style.inputField">
+          <h3>Enter chat name:</h3>
+          <input :class="$style.inputName" v-model="chatName" />
+        </div>
+        <div :class="$style.actions">
+          <div :class="$style.submitButton" @click="createChat">Create</div>
+          <div :class="$style.close" @click="emit('close')">Close</div>
+        </div>
       </div>
-      <div :class="$style.actions">
-        <div :class="$style.submitButton" @click="createChat">Create</div>
-        <div :class="$style.close" @click="emit('close')">Close</div>
+      <div :class="$style.chatJoin">
+        <h2>Or join existing one:</h2>
+        <div :class="$style.inputField">
+          <h3>Enter invite link:</h3>
+          <input :class="$style.inputName" v-model="inviteLink" />
+        </div>
+        <div :class="$style.actions">
+          <div :class="$style.submitButton" @click="joinChat">Join</div>
+        </div>
       </div>
     </div>
   </div>
@@ -78,6 +108,11 @@ async function createChat() {
   flex-direction: column;
   align-items: center;
 
+  & > * {
+    margin-bottom: 15px;
+    width: 50%;
+  }
+
   .inputField {
     display: flex;
     flex-direction: column;
@@ -92,15 +127,14 @@ async function createChat() {
     flex-direction: row;
 
     margin-top: 10px;
+    justify-content: space-between;
     & > * {
       cursor: pointer;
 
       height: 30px;
-      margin-left: 30px;
 
       display: flex;
       align-items: center;
-      justify-content: center;
     }
 
     .submitButton {

@@ -22,6 +22,9 @@ function passwordLogin() {
     </div>
     <button :class="$style.loginButton" @click="passwordLogin">Login</button>
   </div>
+  <br />
+  <br />
+  <div>Or <NuxtLink to="/register">register</NuxtLink></div>
 </template>
 
 <style module lang="scss">

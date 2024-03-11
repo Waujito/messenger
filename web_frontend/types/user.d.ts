@@ -27,3 +27,8 @@ export type ReadyUser = {
 } & Author;
 
 export type User = StatedUser | ReadyUser;
+
+export type RegisterForm = {
+  username: string;
+  password: string;
+};
