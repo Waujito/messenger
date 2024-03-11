@@ -46,6 +46,7 @@ function messageEditFlow(message: Message) {
 
 defineExpose({
   messageEditFlow,
+  focusToTextarea,
 });
 
 function sendButton() {

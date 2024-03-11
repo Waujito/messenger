@@ -25,12 +25,16 @@ const messageHistory: Ref<ChatHistory | null> = ref(null);
 const chatHistoryElement: Ref<
   InstanceType<typeof ChatHistoryComponent> | undefined
 > = ref();
+const messageSender = ref<InstanceType<typeof SendMessageComponent> | null>(
+  null
+);
 
 async function initChat() {
   if (!chat.value) return (messageHistory.value = null);
 
   messageHistory.value = new ChatHistory(chat.value, user.value);
   await messageHistory.value.loadHistory();
+  messageSender.value?.focusToTextarea();
 }
 
 onMounted(() => initChat());
@@ -38,10 +42,6 @@ onMounted(() => initChat());
 watch(chat, async (newChat, oldChat) => {
   initChat();
 });
-
-const messageSender = ref<InstanceType<typeof SendMessageComponent> | null>(
-  null
-);
 
 function messageEditFlow(message: Message) {
   messageSender.value?.messageEditFlow(message);
@@ -134,11 +134,14 @@ async function deleteMessage(message: Message) {
         ref="chatHistoryElement"
       />
 
-      <SendMessageComponent
-        @send-message="sendMessage"
-        @edit-message="editMessage"
-        ref="messageSender"
-      />
+      <KeepAlive>
+        <SendMessageComponent
+          @send-message="sendMessage"
+          @edit-message="editMessage"
+          ref="messageSender"
+          :key="chat.id"
+        />
+      </KeepAlive>
     </div>
     <div :class="$style.noChatBody" v-else>Nothing here</div>
   </div>
