@@ -1,14 +1,8 @@
 from . import api
 from flask import request, jsonify, Response
-from ..db.models import User, db, Chat, ChatMembership
-from sqlalchemy import select
-from werkzeug.exceptions import BadRequest, NotFound, Forbidden, MethodNotAllowed
+from ..db.models import User
 
-from jsonschema import validate
-from .jsonschema import chatCreationRequestSchema
-from .chatsSerivce import get_chat_or_error, get_user_chat_membership
-from ..auth.usersService import get_user as get_member, get_user_or_error as get_member_or_error
-from .chatMembershipService import get_chat_members as get_chat_members_service
+from .chatMembershipService import get_chat_members as get_chat_members_service, get_membership, kick_member
 
 
 def get_user() -> User:
@@ -21,60 +15,31 @@ def get_chat_members(chat_id):
 
     members = get_chat_members_service(user, chat_id)
 
-    return members
+    return jsonify(list(map(lambda x: x.to_json(), members)))
 
 
-@api.route("/chats/<int:chat_id>/members/<int:member_id>", methods=["GET", "POST", "DELETE"])
-def chats_member_methods(chat_id, member_id):
+@api.route("/chats/<int:chat_id>/members/<int:member_id>", methods=["GET"])
+def get_member(chat_id, member_id):
     user = get_user()
 
-    chat = get_chat_or_error(chat_id)
-    chat_owner = chat.owner
+    membership = get_membership(user, chat_id, member_id)
 
-    member = get_member_or_error(member_id)
+    return jsonify(membership.to_json())
 
-    membership = get_user_chat_membership(chat_id, member_id)
-    user_membership = get_user_chat_membership(chat_id, user.id)
 
-    # Handle GET method. Return the membership
-    if request.method == "GET":
-        if not user_membership:
-            raise Forbidden()
+@api.route("/chats/<int:chat_id>/members/@me", methods=["GET"])
+def get_self_membership(chat_id, member_id):
+    user = get_user()
 
-        if membership:
-            return jsonify(membership.to_json())
-        else:
-            raise NotFound("The user is not a member of the chat")
-    # Add the user to the chat
-    elif request.method == "POST":
-        if user != chat_owner:
-            raise Forbidden()
+    membership = get_membership(user, chat_id)
 
-        if membership:
-            raise BadRequest("The user is already member of the chat.")
+    return jsonify(membership.to_json())
 
-        membership = ChatMembership(
-            chat_id=chat.id,
-            user_id=member.id
-        )
 
-        db.session.add(membership)
-        db.session.commit()
+@api.route("/chats/<int:chat_id>/members/<int:member_id>", methods=["DELETE"])
+def delete_memberhip(chat_id, member_id):
+    user = get_user()
 
-        return Response(status=201)
-    # Kick the user
-    elif request.method == "DELETE":
-        # member may be deleted from chat by chat owner or leave by itself
-        if user != chat_owner and not (user.id == member_id and membership is not None):
-            raise Forbidden()
+    kick_member(user, chat_id, member_id)
 
-        if not membership:
-            return NotFound("The user is not a member of the chat")
-
-        db.session.delete(membership)
-        db.session.commit()
-
-        return Response(status=204)
-    else:
-        # to suppress pylance error
-        raise MethodNotAllowed()
+    return Response(status=204)
