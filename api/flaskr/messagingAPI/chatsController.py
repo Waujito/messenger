@@ -1,13 +1,10 @@
 from . import api
 from flask import request, jsonify, Response
-from ..db.models import User, db, Chat, ChatMembership
-from sqlalchemy import select
-from werkzeug.exceptions import BadRequest, NotFound
+from ..db.models import User
+from werkzeug.exceptions import BadRequest
 
-from jsonschema import validate
-from .jsonschema import chatCreationRequestSchema
 
-from .chatsSerivce import get_chat, get_chat_or_error, create_chat as create_chat_service, get_user_chats, delete_chat as delete_chat_service
+from .chatsSerivce import create_chat as create_chat_service, get_user_chats, delete_chat as delete_chat_service
 
 
 def get_user() -> User:

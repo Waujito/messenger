@@ -1,15 +1,7 @@
 from . import api
 from flask import request, jsonify, Response
-from ..db.models import User, db, Chat, ChatMembership, Message
-from sqlalchemy import select
-from werkzeug.exceptions import BadRequest, NotFound, Forbidden, MethodNotAllowed
-
-from jsonschema import validate
-from .jsonschema import chatCreationRequestSchema
-from .chatsSerivce import get_chat_or_error, get_user_chat_membership, ensure_membership
-from ..auth.usersService import get_user as get_member, get_user_or_error as get_member_or_error
-from .messagesService import get_message_or_error, list_messages, post_message, updateMessage, deleteMessage as deleteMessageService
-import re
+from ..db.models import User
+from .messagesService import list_messages, post_message, updateMessage, deleteMessage as deleteMessageService
 
 
 def get_user() -> User:
@@ -39,8 +31,8 @@ def get_chat_messages(chat_id: int):
     loadDirection = - \
         1 if "loadDirection" in request.args and request.args["loadDirection"] == "-1" else 1
 
-    messages = list_messages(user, chat_id, messagesLimit,
-                             startingIndex, loadDirection)
+    messages = list_messages(user, chat_id, limit=messagesLimit,
+                             startingIndex=startingIndex, loadDirection=loadDirection)
 
     return jsonify(list(map(lambda x: x.to_json(), messages)))
 

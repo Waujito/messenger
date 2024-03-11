@@ -1,4 +1,4 @@
-from ..db.models import User, db, Chat, ChatMembership, Message
+from ..db.models import User, db, Chat, Message
 from sqlalchemy import select
 from werkzeug.exceptions import NotFound, Forbidden, BadRequest
 from .chatsSerivce import ensure_membership, get_chat_or_error

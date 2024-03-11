@@ -1,4 +1,3 @@
-from http.client import BAD_REQUEST
 from jsonschema import validate
 from ..db.models import User, db, Chat, ChatMembership
 from sqlalchemy import select
