@@ -1,11 +1,16 @@
 <script setup lang="ts">
 import type { Chat } from "~/types/chat";
-import type { Message } from "~/types/message";
+import type { Message, MessageContent } from "~/types/message";
+
+import { ChatHistory } from "~/helpers/messagingApi/messageHistory";
+
 import {
-  loadChatHistory,
-  nonBlankRegex,
+  sendMessage as apiSendMessage,
+  deleteMessage as apiDeleteMessage,
+  editMessage as apiEditMessage,
 } from "~/helpers/messagingApi/messagesManagement";
-import { sendMessage as apiSendMessage } from "~/helpers/messagingApi/messagesManagement";
+import SendMessageComponent from "./SendMessageComponent.vue";
+import ChatHistoryComponent from "./ChatHistoryComponent.vue";
 
 const props = defineProps<{
   chat: Chat | undefined;
@@ -16,102 +21,101 @@ const { chat } = toRefs(props);
 const userStore = useUserStore();
 const user = userStore.readyUser;
 
-const messageHistory: Ref<Message[] | undefined> = ref();
+const messageHistory: Ref<ChatHistory | null> = ref(null);
+const chatHistoryElement: Ref<
+  InstanceType<typeof ChatHistoryComponent> | undefined
+> = ref();
+const messageSender = ref<InstanceType<typeof SendMessageComponent> | null>(
+  null
+);
 
-const messageHistoryElem: Ref<HTMLDivElement[] | undefined> = ref();
+async function initChat() {
+  if (!chat.value) return (messageHistory.value = null);
 
-function scrollToLastMessage(smooth: boolean = false) {
-  if (messageHistoryElem.value)
-    messageHistoryElem.value[
-      messageHistoryElem.value.length - 1
-    ].scrollIntoView(smooth ? { behavior: "smooth" } : {});
+  messageHistory.value = new ChatHistory(chat.value, user.value);
+  await messageHistory.value.loadHistory();
+  messageSender.value?.focusToTextarea();
 }
 
-function tryLoadHistory() {
-  if (chat.value) {
-    loadChatHistory(chat.value, user.value)
-      .then((h) => {
-        messageHistory.value = h;
-        nextTick(scrollToLastMessage);
-      })
-      .catch((err) => {
-        throw err;
-      });
-  } else messageHistory.value = undefined;
-}
-
-tryLoadHistory();
+onMounted(() => initChat());
 
 watch(chat, async (newChat, oldChat) => {
-  tryLoadHistory();
+  initChat();
 });
 
-const messageContent: Ref<string> = ref("");
+function messageEditFlow(message: Message) {
+  messageSender.value?.messageEditFlow(message);
+}
 
-async function sendMessage() {
-  if (!chat.value || !messageContent.value) return;
-  if (nonBlankRegex.test(messageContent.value)) {
-    const newMessage: Message = reactive({
-      id: "",
-      authorId: user.value.id,
-      content: messageContent.value,
-      createdAt: "now",
-    });
+async function sendMessage(messageContent: MessageContent) {
+  messageContent = messageContent.trim();
+  if (!chat.value || !messageContent) return;
 
-    messageHistory.value?.push(newMessage);
+  const newMessage: Message = reactive({
+    id: "",
+    author: user.value,
+    content: messageContent,
+    created_at: "now",
+    privileges: "author",
+    state: "pending",
+  });
 
-    const sentMessagePromise = apiSendMessage(
-      messageContent.value,
-      chat.value,
-      user.value
-    );
+  messageHistory.value?.messageSent(newMessage);
+  nextTick(() => chatHistoryElement.value?.scrollToLastMessage(true));
 
-    messageContent.value = "";
+  const sentMessagePromise = apiSendMessage(
+    messageContent,
+    chat.value,
+    user.value
+  );
 
-    nextTick(() => {
-      updateTextareaHeight();
-      scrollToLastMessage(true);
-    });
+  let sentMessage = newMessage;
+  try {
+    sentMessage = await sentMessagePromise;
+  } catch {
+    newMessage.state = "postingError";
+  }
 
-    const sentMessage = await sentMessagePromise;
-
-    for (const key in sentMessage) {
+  for (const key in newMessage) {
+    if (key in sentMessage) {
       // @ts-expect-error Typescript cannot normally operate with keys object mapping
       newMessage[key] = sentMessage[key];
+    } else {
+      // @ts-expect-error Typescript cannot normally operate with keys object mapping
+      newMessage[key] = undefined;
     }
-  } else {
-    messageContent.value = "";
+  }
+  newMessage.privileges = "author";
+}
 
-    nextTick(() => {
-      updateTextareaHeight();
-      scrollToLastMessage(true);
-    });
+async function editMessage(messageContent: MessageContent, message: Message) {
+  messageContent = messageContent.trim();
+
+  if (!chat.value || !message || !messageContent) return;
+
+  const oldContent = message.content;
+  const wasUpdated = message.updated_at;
+  message.content = messageContent;
+  message.updated_at = "now";
+
+  try {
+    await apiEditMessage(messageContent, message, chat.value, user.value);
+  } catch {
+    message.content = oldContent;
+    message.updated_at = wasUpdated;
   }
 }
 
-const textareaField: Ref<HTMLTextAreaElement | undefined> = ref();
-const textareaMaxHeight = 200;
-const textareaHeight = ref<number>(19);
+async function deleteMessage(message: Message) {
+  if (!chat.value) return;
 
-function updateTextareaHeight() {
-  if (!textareaField.value) return;
+  message.state = "hidden";
 
-  textareaField.value.style.height = "0";
-
-  textareaHeight.value = Math.min(
-    textareaField.value.scrollHeight,
-    textareaMaxHeight
-  );
-
-  textareaField.value.style.height = textareaHeight.value + "px";
-}
-
-onMounted(() => nextTick(updateTextareaHeight));
-
-function focusToTextarea() {
-  if (!textareaField.value) return;
-
-  textareaField.value.focus();
+  try {
+    await apiDeleteMessage(message, chat.value, user.value);
+  } catch {
+    console.log("Could'nt delete message.");
+  }
 }
 </script>
 
@@ -121,40 +125,23 @@ function focusToTextarea() {
       <div :class="$style.head">
         {{ chat.name }}
       </div>
-      <div :class="$style.messageHistory">
-        <div
-          :class="$style.message"
-          v-for="message in messageHistory"
-          :key="message.id"
-          ref="messageHistoryElem"
-        >
-          <div :class="$style.messageAuthor">{{ message.authorId }}</div>
-          <div :class="$style.messageContent">
-            {{ message.content }}
-          </div>
-          <div :class="$style.timestamps">
-            {{ message.createdAt }} {{ message.updatedAt ? "(updated)" : "" }}
-          </div>
-        </div>
-      </div>
-      <div :class="$style.sendMessage" @click="focusToTextarea">
-        <div :class="$style.messageContentWrapper">
-          <textarea
-            :class="$style.messageContent"
-            :style="{ height: textareaHeight + 'px' }"
-            v-model="messageContent"
-            ref="textareaField"
-            @input="updateTextareaHeight"
-            @keypress.enter.exact="
-              (e) => {
-                e.preventDefault();
-                sendMessage();
-              }
-            "
-          ></textarea>
-        </div>
-        <div :class="$style.messageSendButton" @click="sendMessage">Send</div>
-      </div>
+      <ChatHistoryComponent
+        :key="chat.id"
+        v-if="messageHistory"
+        :message-history="messageHistory"
+        @edit-message="messageEditFlow"
+        @delete-message="deleteMessage"
+        ref="chatHistoryElement"
+      />
+
+      <KeepAlive>
+        <SendMessageComponent
+          @send-message="sendMessage"
+          @edit-message="editMessage"
+          ref="messageSender"
+          :key="chat.id"
+        />
+      </KeepAlive>
     </div>
     <div :class="$style.noChatBody" v-else>Nothing here</div>
   </div>
@@ -193,84 +180,6 @@ function focusToTextarea() {
 
     background-color: $bg-func;
     border-left: 2px solid $bg-message;
-  }
-
-  .messageHistory {
-    display: flex;
-    flex-direction: column;
-
-    overflow-y: scroll;
-    height: 100%;
-
-    padding: 10px 20px;
-
-    .message {
-      display: flex;
-      flex-direction: column;
-      margin: 5px 0;
-      padding: 8px 8px;
-
-      border-radius: 10px;
-
-      background-color: $bg-message;
-
-      max-width: 70%;
-      .messageContent {
-        margin-top: 5px;
-        white-space: pre-wrap;
-      }
-
-      .timestamps {
-        margin-top: 5px;
-        text-align: end;
-      }
-    }
-  }
-  .sendMessage {
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-
-    background-color: $bg-func;
-    color: $cl-func;
-
-    border-left: 2px solid $bg-message;
-
-    .messageContentWrapper {
-      min-height: 40px;
-      flex-grow: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      padding: 10px;
-      .messageContent {
-        resize: none;
-        flex-grow: 1;
-
-        background-color: inherit;
-        color: inherit;
-      }
-    }
-
-    .messageSendButton {
-      padding: 10px;
-      display: flex;
-
-      text-align: center;
-      align-items: center;
-      justify-content: center;
-
-      background-color: inherit;
-      color: inherit;
-
-      cursor: pointer;
-      user-select: none;
-
-      &:hover {
-        background-color: $hov-func;
-      }
-    }
   }
 }
 </style>

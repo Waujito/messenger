@@ -4,5 +4,5 @@ import { useUserStore } from "~/stores/user";
 const userStore = useUserStore();
 </script>
 <template>
-  <div @click="userStore.loginFlow()">Login</div>
+  <NuxtLink to="/login">Login</NuxtLink>
 </template>

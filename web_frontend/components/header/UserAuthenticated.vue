@@ -8,6 +8,7 @@ const user = userStore.readyUser;
 
 <template>
   <div @click="userStore.logout">
-    <p>{{ user.name }}</p>
+    <p>{{ user.username }}</p>
   </div>
+  <NuxtLink to="/board">Dashboard</NuxtLink>
 </template>

@@ -1,11 +1,14 @@
-import type { JWT, User } from "~/types/user";
+import type { Author, JWT, User } from "~/types/user";
+import { getAuthorizedApi } from "../api";
 
 export async function loadUser(userToken: JWT): Promise<User> {
+  const api = getAuthorizedApi(userToken);
+  const response = await api.get("/user");
+  const author: Author = response.data;
+
   return {
     state: "ready",
-    id: userToken.sub,
-    name: userToken.sub,
-    avatar: undefined,
     token: userToken,
+    ...author,
   };
 }

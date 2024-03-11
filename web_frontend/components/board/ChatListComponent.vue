@@ -2,22 +2,43 @@
 import type { Chat } from "~/types/chat";
 const props = defineProps<{
   chatList: Chat[];
+  activeChat: Chat | undefined;
 }>();
 
 const emits = defineEmits<{
   (e: "chatSelected", chat: Chat): void;
 }>();
+
+const showCreatePrompt = ref<boolean>();
+function chatCreated(chat: Chat) {
+  // eslint-disable-next-line vue/no-mutating-props
+  props.chatList.push(chat);
+  emits("chatSelected", chat);
+}
 </script>
 
 <template>
   <div :class="$style.chatList">
-    <div
-      :class="$style.chatUnit"
-      v-for="chat of chatList"
-      :key="chat.id"
-      @click="() => emits('chatSelected', chat)"
-    >
-      {{ chat.name }}
+    <div>
+      <div
+        :class="[
+          $style.chatUnit,
+          activeChat?.id == chat.id ? $style.activeChat : undefined,
+        ]"
+        v-for="chat of chatList"
+        :key="chat.id"
+        @click="() => emits('chatSelected', chat)"
+      >
+        {{ chat.name }}
+      </div>
+      <div :class="$style.createChat" @click="showCreatePrompt = true">
+        Create Chat
+      </div>
+      <BoardChatCreateComponent
+        v-if="showCreatePrompt"
+        @close="showCreatePrompt = false"
+        @chat-created="chatCreated"
+      />
     </div>
   </div>
 </template>
@@ -28,7 +49,7 @@ const emits = defineEmits<{
   flex-direction: column;
 
   height: 100%;
-  overflow-y: scroll;
+  overflow-y: auto;
 
   width: 100%;
 
@@ -48,6 +69,27 @@ const emits = defineEmits<{
     cursor: pointer;
     user-select: none;
 
+    &.activeChat {
+      background-color: $bg-message;
+    }
+
+    &:hover {
+      background-color: $dark-hov0;
+    }
+  }
+
+  .createChat {
+    width: 100%;
+    height: 60px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+
+    background-color: $bg-message;
+
+    margin-top: 10px;
     &:hover {
       background-color: $dark-hov0;
     }

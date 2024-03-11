@@ -21,6 +21,7 @@ loadChats(user.value)
       <BoardChatListComponent
         :chat-list="chats"
         @chat-selected="(chat) => (currentChat = chat)"
+        :activeChat="currentChat"
         v-if="chats"
       />
       <div :class="$style.chatsLoading" v-else>Loading...</div>

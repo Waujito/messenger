@@ -1,8 +1,8 @@
 import { defineStore } from "pinia";
-import type { ReadyUser, User } from "~/types/user";
+import type { JWT, ReadyUser, User } from "~/types/user";
 import { deleteJWT, getJWT, getJWTOrNull } from "~/helpers/auth/jwt";
 import { loadUser } from "~/helpers/auth/user";
-import { OAuth2AuthorizeFlow } from "~/helpers/auth/oauth2";
+import { passwordLogin as passwordLoginHelper } from "~/helpers/auth/login";
 
 export const useUserStore = defineStore("user", () => {
   const router = useRouter();
@@ -16,14 +16,30 @@ export const useUserStore = defineStore("user", () => {
     user.value = newUser;
   }
 
+  function setNullUser() {
+    setUser({ state: "unauthenticated" });
+    return user.value;
+  }
+
+  function setLoadingUser() {
+    setUser({ state: "loading" });
+    return user.value;
+  }
+
   async function reloadUser(force: boolean = false): Promise<User> {
-    const userToken = getJWT();
+    const userToken = getJWTOrNull();
+    if (!userToken) return setNullUser();
 
     if (user.value.state == "loading" && !force) return await getUser();
     else {
       setUser({ state: "loading" });
 
-      setUser(await loadUser(userToken));
+      try {
+        const loaded = await loadUser(userToken);
+        setUser(loaded);
+      } catch {
+        return dropUser();
+      }
 
       return await getUser();
     }
@@ -53,20 +69,24 @@ export const useUserStore = defineStore("user", () => {
     });
   }
 
-  /**
-   *
-   * Perform oauth2 login with an authorization server
-   *
-   */
-  async function loginFlow() {
+  async function passwordLogin(login: string, password: string) {
+    console.log(`${login}:${password}`);
+    const awtf = passwordLoginHelper(login, password);
+
+    await defaultLoginFlowAwaiter(awtf);
+  }
+
+  async function defaultLoginFlowAwaiter(awt_func: Promise<JWT>) {
     try {
-      await OAuth2AuthorizeFlow();
-      await reloadUser(true);
+      setLoadingUser();
+
+      const jwt = await awt_func;
+
+      setUser(await loadUser(jwt));
       postLogin();
     } catch (e) {
-      if (e instanceof Error)
-        alert(`Login failed with an error: \n${e.message ?? ""}`);
-      else alert(`An unhandled error occurred`);
+      alert(e instanceof Error ? e.message : "An unexpected error occured!");
+      setNullUser();
     }
   }
 
@@ -76,9 +96,13 @@ export const useUserStore = defineStore("user", () => {
     return user.state != "unauthenticated";
   }
 
-  function logout() {
+  function dropUser() {
     deleteJWT();
-    setUser({ state: "unauthenticated" });
+    return setNullUser();
+  }
+
+  function logout() {
+    dropUser();
 
     router.push("/");
   }
@@ -93,7 +117,7 @@ export const useUserStore = defineStore("user", () => {
     getUser,
     getReadyUser,
     reloadUser,
-    loginFlow,
+    passwordLogin,
     isAuthenticated,
     logout,
   };

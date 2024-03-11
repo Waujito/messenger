@@ -1,22 +1,41 @@
-FROM gradle:8.5-jdk17-jammy as build
+FROM condaforge/mambaforge as env
+ARG DEBIAN_FRONTEND=noninteractive
 
-WORKDIR /app
+RUN apt update -y && apt upgrade -y 
 
-COPY gradle gradle
-COPY gradlew .
-COPY build.gradle.kts .
-COPY settings.gradle.kts .
-COPY src src
+FROM env as build
 
-RUN --mount=type=cache,target=/root/.gradle gradle bootJar --parallel
-RUN cp build/libs/*.jar /app.jar
+WORKDIR /app/
 
-EXPOSE 8080
+RUN python -m venv /opt/venv
+# Enable venv
+ENV PATH="/opt/venv/bin:$PATH"
 
-FROM eclipse-temurin:17-jdk-alpine as development
-COPY --from=build /app.jar /app.jar
-ENTRYPOINT ["java", "-Dspring-boot.repackage.excludeDevtools=false", "-Dspring-boot.run.jvmArguments='-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8000'","-Dspring.profiles.active=dev","-jar","/app.jar"]
+RUN pip install build
+COPY requirements.txt .
+COPY pyproject.toml .
 
-FROM eclipse-temurin:17-jdk-alpine as production
-COPY --from=build /app.jar /app.jar
-ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-Dspring.profiles.active=prod","-jar","/app.jar"]
+COPY flaskr flaskr
+
+RUN python -m build --wheel
+
+RUN mkdir /prj
+
+RUN cp dist/$(ls dist | head -1) /prj/
+
+FROM python:3.11-alpine as prod
+
+RUN pip install waitress
+
+RUN mkdir /prj
+COPY --from=bulid /prj/* /prj/
+
+RUN pip install /prj/$(ls /prj)
+
+ENTRYPOINT [ "waitress-serve",  "--call", "flaskr:create_app" ]
+
+FROM env as dev
+RUN conda create -n cenv python=3.11
+
+COPY requirements.txt .
+RUN conda run --no-capture-output -n cenv pip install -Ur requirements.txt
