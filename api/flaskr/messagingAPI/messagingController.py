@@ -37,7 +37,7 @@ def get_chat_messages(chat_id: int):
     return jsonify(list(map(lambda x: x.to_json(), messages)))
 
 
-@api.route("/chats/<int:chat_id>/messages/<int:message_id>", methods=["DELETE"])
+@api.route("/chats/<int:chat_id>/messages/<int:message_id>", methods=["PUT"])
 def editMessage(chat_id, message_id):
     user = get_user()
 
@@ -48,7 +48,7 @@ def editMessage(chat_id, message_id):
     return jsonify(message.to_json())
 
 
-@api.route("/chats/<int:chat_id>/messages/<int:message_id>", methods=["PUT", "DELETE"])
+@api.route("/chats/<int:chat_id>/messages/<int:message_id>", methods=["DELETE"])
 def deleteMessage(chat_id, message_id):
     user = get_user()
 

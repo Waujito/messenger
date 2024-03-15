@@ -33,6 +33,8 @@ chatSocket.on(
 
     const { chat_id } = data;
     const chat = chats.value[chat_id];
+    if (!chat) return;
+
     const apiMessage = data.message;
 
     // Websockets works much faster than api connections
@@ -44,6 +46,23 @@ chatSocket.on(
     const message: Message = responseToMessage(apiMessage, chat, user.value);
 
     chat.chatHistory.newMessage(message);
+  }
+);
+
+chatSocket.on(
+  "messageDelete",
+  async (data: { chat_id: number; message_id: number }) => {
+    if (!chats.value) return;
+
+    const { chat_id, message_id } = data;
+
+    const chat = chats.value[chat_id];
+    if (!chat) return;
+
+    const message: Message = chat.chatHistory.idToMessage[message_id];
+    if (!message) return;
+
+    message.state = "hidden";
   }
 );
 </script>

@@ -35,6 +35,13 @@ export class ChatHistory {
     id: 0,
   });
 
+  /**
+   * Stores references to messages by id.
+   */
+  readonly idToMessage: {
+    [key: string]: Message;
+  } = {};
+
   constructor(chat: Chat, user: ReadyUser) {
     this.chat = chat;
     this.user = user;
@@ -105,10 +112,17 @@ export class ChatHistory {
       }
 
       this.history.unshift(...preHistory);
+
+      for (const message of preHistory) {
+        this.idToMessage[message.id] = message;
+      }
     } else {
       if (preHistory.length < limit) this.downFilled = true;
-
       preHistory.shift();
+
+      for (const message of preHistory) {
+        this.idToMessage[message.id] = message;
+      }
       this.history.push(...preHistory);
     }
   }
@@ -168,6 +182,7 @@ export class ChatHistory {
   newMessage(message: Message) {
     if (this.markNewId(message.id)) this.history.push(message);
     this.newMessageId.id = message.id;
+    this.idToMessage[message.id] = message;
   }
 
   async sendMessage(messageContent: string) {

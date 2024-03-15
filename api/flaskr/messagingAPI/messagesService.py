@@ -95,6 +95,9 @@ def deleteMessage(user: User, chat_id: int, message_id: int):
     db.session.delete(message)
     db.session.commit()
 
+    socketio.emit("messageDelete", {"chat_id": chat.id, "message_id": message.id}, namespace="/chat",
+                  to=MessagingNamespace.chat_to_room(chat))
+
 
 def updateMessage(user: User, chat_id: int, message_id: int, messageContent: str):
     """Updates the message"""
