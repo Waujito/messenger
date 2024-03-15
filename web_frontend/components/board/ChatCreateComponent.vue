@@ -3,7 +3,8 @@ import {
   createChat as apiCreateChat,
   joinChat as apiJoinChat,
 } from "~/helpers/messagingApi/chatsManagement";
-import type { Chat, ChatCreateData } from "~/types/chat";
+import type { ChatCreateData } from "~/types/chat";
+import { Chat } from "~/helpers/messagingApi/Chat";
 const userStore = useUserStore();
 const user = userStore.readyUser;
 

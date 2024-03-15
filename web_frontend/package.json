@@ -17,6 +17,7 @@
     "crypto-js": "^4.2.0",
     "jwt-decode": "^4.0.0",
     "nuxt": "3.10.2",
+    "socket.io-client": "^4.7.5",
     "vue": "3.4.19",
     "vue-router": "^4.2.5"
   },

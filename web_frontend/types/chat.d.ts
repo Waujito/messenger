@@ -1,17 +1,23 @@
+import type { Chat } from "~/helpers/messagingApi/Chat";
+
 export type ApiChat = {
-  id: string;
+  id: number;
   name: string;
   icon?: string;
-  createdAt?: string;
+  createdAt: string;
   updatedAt?: string;
-  owner_id: string;
+  owner_id: number;
 };
-export type Chat = ApiChat;
+// export type Chat = ApiChat;
+
+export type ChatsArr = {
+  [key: number]: Chat;
+};
 
 export type ApiChatMembership = {
   userId: string;
   chat: ApiChat;
-  id: string;
+  id: number;
   joinedAt: string;
 };
 

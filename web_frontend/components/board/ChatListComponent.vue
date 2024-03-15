@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import type { Chat } from "~/types/chat";
+import { Chat } from "~/helpers/messagingApi/Chat";
+import type { ChatsArr } from "~/types/chat";
 const props = defineProps<{
-  chatList: Chat[];
+  chatList: ChatsArr;
   activeChat: Chat | undefined;
 }>();
+
+const { chatList } = toRefs(props);
 
 const emits = defineEmits<{
   (e: "chatSelected", chat: Chat): void;
@@ -11,8 +14,7 @@ const emits = defineEmits<{
 
 const showCreatePrompt = ref<boolean>();
 function chatCreated(chat: Chat) {
-  // eslint-disable-next-line vue/no-mutating-props
-  props.chatList.push(chat);
+  chatList.value[chat.id] = chat;
   emits("chatSelected", chat);
 }
 </script>

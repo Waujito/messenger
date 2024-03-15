@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ChatHistory } from "~/helpers/messagingApi/messageHistory";
+import { ChatHistory } from "~/helpers/messagingApi/MessageHistory";
 import type { Message } from "~/types/message";
 import MessageComponent from "./MessageComponent.vue";
 
@@ -136,6 +136,11 @@ defineExpose({
 
 onMounted(() => {
   scrollToLastMessage(false);
+});
+
+watch(messageHistory.value.newMessageId, () => {
+  if (!historyView.value) return;
+  if (scrollbarAtBottom(historyView.value)) scrollToLastMessage(true);
 });
 </script>
 

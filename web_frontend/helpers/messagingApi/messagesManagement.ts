@@ -1,5 +1,6 @@
-import type { Chat } from "~/types/chat";
+import { Chat } from "./Chat";
 import type {
+  ApiMessage,
   Message,
   MessageContent,
   MessagePrivileges,
@@ -8,12 +9,12 @@ import type { ReadyUser } from "~/types/user";
 import { getAuthorizedApi } from "../api";
 
 export function getMessagePrivileges(
-  message: Message,
+  message: ApiMessage,
   chat: Chat,
   user: ReadyUser
 ): MessagePrivileges {
   if (message.author.id === user.id) return "author";
-  if (chat.owner_id == user.id) return "owner";
+  if (chat.ownerId == user.id) return "owner";
 
   return "viewer";
 }
@@ -31,7 +32,10 @@ export async function sendMessage(
     },
   });
 
-  return response.data as Message;
+  const apiMessage = response.data as ApiMessage;
+  const message: Message = responseToMessage(apiMessage, chat, user);
+
+  return message;
 }
 
 export async function deleteMessage(
@@ -61,4 +65,21 @@ export async function editMessage(
       },
     }
   );
+}
+
+/**
+ * Converts message response from api to system message object
+ * @param apiMessage
+ */
+export function responseToMessage(
+  apiMessage: ApiMessage,
+  chat: Chat,
+  user: ReadyUser
+): Message {
+  const message: Message = {
+    ...apiMessage,
+    privileges: getMessagePrivileges(apiMessage, chat, user),
+  };
+
+  return message;
 }

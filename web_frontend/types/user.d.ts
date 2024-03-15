@@ -14,7 +14,7 @@ export type JWT = {
 export type StatedUser = { state: "unauthenticated" | "loading" };
 
 export type Author = {
-  id: string;
+  id: number;
   username: string;
   avatar?: string;
   created_at: string;
