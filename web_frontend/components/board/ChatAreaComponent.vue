@@ -59,10 +59,30 @@ chatSocket.on(
     const chat = chats.value[chat_id];
     if (!chat) return;
 
-    const message: Message = chat.chatHistory.idToMessage[message_id];
+    const message = chat.chatHistory.messageFromId(message_id);
     if (!message) return;
 
     message.state = "hidden";
+  }
+);
+
+chatSocket.on(
+  "messageUpdate",
+  async (data: { chat_id: number; message: ApiMessage }) => {
+    if (!chats.value) return;
+
+    const { chat_id, message } = data;
+
+    const chat = chats.value[chat_id];
+    if (!chat) return;
+
+    const chatMessage = chat.chatHistory.messageFromId(message.id);
+    if (!chatMessage) return;
+
+    for (const key in message) {
+      // @ts-expect-error Typescript cannot normally operate with keys object mapping
+      chatMessage[key] = message[key];
+    }
   }
 );
 </script>

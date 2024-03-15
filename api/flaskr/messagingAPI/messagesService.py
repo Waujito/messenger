@@ -115,4 +115,7 @@ def updateMessage(user: User, chat_id: int, message_id: int, messageContent: str
 
     db.session.commit()
 
+    socketio.emit("messageUpdate", {"chat_id": chat.id, "message": message.to_json()}, namespace="/chat",
+                  to=MessagingNamespace.chat_to_room(chat))
+
     return message

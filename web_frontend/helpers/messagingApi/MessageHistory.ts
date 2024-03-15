@@ -38,7 +38,7 @@ export class ChatHistory {
   /**
    * Stores references to messages by id.
    */
-  readonly idToMessage: {
+  private readonly idToMessage: {
     [key: string]: Message;
   } = {};
 
@@ -225,5 +225,13 @@ export class ChatHistory {
     }
 
     return newMessage;
+  }
+
+  /**
+   * Finds and returns the message by its id
+   * @param id
+   */
+  messageFromId(id: number): Message | undefined {
+    return this.idToMessage[id];
   }
 }
