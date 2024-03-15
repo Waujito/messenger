@@ -4,10 +4,12 @@ from . import jsonschema
 from jsonschema.exceptions import ValidationError
 from jsonschema import validate
 from werkzeug.exceptions import BadRequest, Unauthorized, Forbidden
-from flask import request, jsonify, current_app
+from flask import request, jsonify, current_app, session
+from socketio.exceptions import ConnectionRefusedError
 from sqlalchemy import select
 import jwt
 from functools import wraps
+
 
 import datetime as dt
 
@@ -87,20 +89,10 @@ def login():
     return encoded_jwt
 
 
-def authorize_user(scope: str | None = None):
-    # OPTIONS requests should be open
-    if request.method == 'OPTIONS':
-        return None, None
-
-    authorization = request.authorization
-
-    if authorization is None:
-        raise Unauthorized(www_authenticate=www_authenticate)
-
-    token = authorization.token
-    if authorization.type != "bearer" or token is None:
-        raise Unauthorized(www_authenticate=www_authenticate)
-
+def authorize_jwt(token: str, scope: str | None = None):
+    """
+    Authorize the user via JWT.
+    """
     secret_key = current_app.config["SECRET_KEY"]
     issuer = current_app.config["JWT_ISSUER"]
 
@@ -124,6 +116,50 @@ def authorize_user(scope: str | None = None):
     return user, token
 
 
+def authorize_http(scope: str | None = None):
+    """
+    Authorizes the HTTP REST Request.
+    """
+    # OPTIONS requests should be open
+    if request.method == 'OPTIONS':
+        return None, None
+
+    authorization = request.authorization
+
+    if authorization is None:
+        raise Unauthorized(www_authenticate=www_authenticate)
+
+    token = authorization.token
+    if authorization.type != "bearer" or token is None:
+        raise Unauthorized(www_authenticate=www_authenticate)
+
+    user, token = authorize_jwt(token, scope)
+
+    return user, token
+
+
+def authorize_socketio(data: dict | None) -> User:
+    """
+    Authorizes the user for socketio part of application.\n
+    `data`: stays for payload of `connect` event. \n
+    Puts the user object to session and returns it or throws ConnectionRefused
+    """
+
+    if (type(data) is not dict) or ('token' not in data) or (type(data['token']) is not str):
+        raise ConnectionRefusedError(
+            'Authentication is not provided or in invalid format')
+
+    token = data['token']
+    try:
+        user, _ = authorize_jwt(token)
+    except Unauthorized or Forbidden:
+        raise ConnectionRefusedError('Unauthorized')
+
+    session['user'] = user
+
+    return user
+
+
 def authorized(scope: str | None = None):
     """
     Ensures user authorization, processes authorization scopes.
@@ -133,7 +169,7 @@ def authorized(scope: str | None = None):
     def decorator(f):
         @wraps(f)
         def auth_func(*args, **kwargs):
-            user, token = authorize_user()
+            user, token = authorize_http()
 
             funcArgs = getfullargspec(f)
             if "user" in funcArgs.args or funcArgs.varkw is not None:

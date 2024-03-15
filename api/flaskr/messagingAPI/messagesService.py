@@ -1,8 +1,12 @@
+from os import name
+
+from flaskr.messagingAPI.sockets.chatSockets import MessagingNamespace
 from ..db.models import User, db, Chat, Message
 from sqlalchemy import select
 from werkzeug.exceptions import NotFound, Forbidden, BadRequest
 from .chatsSerivce import ensure_membership, get_chat_or_error
 import re
+from .sockets import socketio
 
 blankRegex = re.compile(r'^\s*$')
 
@@ -35,6 +39,9 @@ def post_message(user: User, chat_id: int, messageContent: str):
 
     db.session.add(message)
     db.session.commit()
+
+    socketio.emit("messageSent", {"chat_id": chat.id, "message": message.to_json()}, namespace="/chat",
+                  to=MessagingNamespace.chat_to_room(chat))
 
     return message
 

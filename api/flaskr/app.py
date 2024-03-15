@@ -1,5 +1,6 @@
 import os
 from flask import Flask
+import flask
 from . import default_config
 from .db import db, init_db, init_db_command
 from .errorHandlers import register_errorhandlers
@@ -8,6 +9,7 @@ from flask_cors import CORS
 import logging
 
 from .messagingAPI import api as messagingAPI
+from .messagingAPI.sockets import socketio
 from .auth import auth
 
 
@@ -40,6 +42,7 @@ def setup_app(app: Flask):
     register_errorhandlers(app)
 
     db.init_app(app)
+    socketio.init_app(app, json=flask.json)
 
     app.register_blueprint(auth)
     app.register_blueprint(messagingAPI)
