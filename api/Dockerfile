@@ -3,6 +3,8 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt update -y && apt upgrade -y 
 
+
+
 FROM env as build
 
 WORKDIR /app/
@@ -23,16 +25,27 @@ RUN mkdir /prj
 
 RUN cp dist/$(ls dist | head -1) /prj/
 
+
+
 FROM python:3.11-alpine as prod
 
-RUN pip install waitress
+RUN pip install pyuwsgi
 
 RUN mkdir /prj
-COPY --from=bulid /prj/* /prj/
+COPY --from=build /prj/* /prj/
 
 RUN pip install /prj/$(ls /prj)
 
-ENTRYPOINT [ "waitress-serve",  "--call", "flaskr:create_app" ]
+COPY uwsgi.ini .
+
+
+
+ENTRYPOINT [ "uwsgi", "uwsgi.ini"]
+
+
+
+
+
 
 FROM env as dev
 RUN conda create -n cenv python=3.11
