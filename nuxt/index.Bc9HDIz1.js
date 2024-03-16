@@ -1,0 +1,1 @@
+import{_ as o,o as t,c as n,a as e}from"./entry.CN6nuUSI.js";const s={},c=e("h1",null,"Welcome to the homepage",-1),_=e("h3",null,"This is an auto-imported component",-1),a=e("h1",null,null,-1),l=[c,_,a];function r(i,d){return t(),n("div",null,l)}const u=o(s,[["render",r]]);export{u as default};
