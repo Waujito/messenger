@@ -22,7 +22,7 @@ jobs:
     env:
       NUXT_APP_BASE_URL: /messenger/
       NUXT_APP_BUILD_ASSETS_DIR: /nuxt/
-      NUXT_PUBLIC_API_URL: "http://10.5.1.10:80"
+      NUXT_PUBLIC_API_URL: "https://10.5.1.11:443"
 
     steps:
       - uses: actions/checkout@v3

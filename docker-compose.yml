@@ -43,6 +43,23 @@ services:
     working_dir: /api
     volumes:
       - ./api:/api
+  
+  api_uwsgi:
+    build:
+      context: api
+      target: prod
+    
+    networks:
+      messenger:
+        ipv4_address: 10.5.1.11
+    ports: 
+      - 443:443
+      - 47485:80
+    env_file:
+      - ./api/.env
+      - .postgresql.env
+    volumes:
+      - ./crt:/crt
 
   postgres:
     image: postgres:16-alpine
