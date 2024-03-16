@@ -41,6 +41,10 @@ jobs:
       - name: Build project
         run: yarn nuxi generate
 
+      # Copy gh pages config
+      - name: Copy pages config
+        run: cp ./gh_pages_config.yml ./.output/public/_config.yml
+
       # Deploy
       - name: Deploy to Github Pages 🚀
         uses: JamesIves/github-pages-deploy-action@v4
