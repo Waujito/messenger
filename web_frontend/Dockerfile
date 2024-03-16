@@ -5,7 +5,7 @@ WORKDIR /app
 
 COPY ./package.json .
 COPY ./yarn.lock .
-RUN yarn install --pure-lockfile
+RUN yarn install
 
 COPY --exclude=./nginx . .
 RUN yarn nuxi generate
