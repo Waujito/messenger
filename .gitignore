@@ -25,3 +25,6 @@ replay_pid*
 
 **/*.env
 !**/*.example.env
+
+# Certificates used for development
+crt/
