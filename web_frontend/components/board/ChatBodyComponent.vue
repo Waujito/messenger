@@ -81,11 +81,13 @@ async function deleteMessage(message: Message) {
     console.log("Couldn't delete message.");
   }
 }
+
+const showInfo = ref<boolean>(false);
 </script>
 
 <template>
   <div :class="$style.chatBody">
-    <div :class="$style.head">
+    <div :class="$style.head" @click="showInfo = true">
       {{ chat.name }}
     </div>
     <ChatHistoryComponent
@@ -105,6 +107,11 @@ async function deleteMessage(message: Message) {
         :key="chat.id"
       />
     </KeepAlive>
+    <BoardChatInfoComponent
+      :chat="chat"
+      v-show="showInfo"
+      @close="showInfo = false"
+    />
   </div>
 </template>
 
@@ -125,6 +132,8 @@ async function deleteMessage(message: Message) {
 
     background-color: $bg-func;
     border-left: 2px solid $bg-message;
+
+    cursor: pointer;
   }
 }
 </style>

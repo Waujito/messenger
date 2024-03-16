@@ -1,5 +1,7 @@
+from uuid import UUID
 from jsonschema import validate
-from ..db.models import User, db, Chat, ChatMembership
+
+from ..db.models import ChatInvite, User, db, Chat, ChatMembership
 from sqlalchemy import select
 from werkzeug.exceptions import NotFound, Forbidden, BadRequest
 from .jsonschema import chatCreationRequestSchema
@@ -20,26 +22,6 @@ def get_chat_or_error(chat_id: int) -> Chat:
         raise NotFound("Chat is not found.")
 
     return chat
-
-
-def get_user_chat_membership(chat_id: int, user_id: int) -> ChatMembership | None:
-    """Returns user's membership with the chat by chat_id and user_id or None if the user is not a member"""
-    return db.session.scalars(
-        select(ChatMembership).where(ChatMembership.chat_id ==
-                                     chat_id and ChatMembership.user_id == user_id)  # type: ignore
-    ).first()
-
-
-def ensure_membership(chat_id: int, user_id: int):
-    """Checks the user to be a member of the chat. Returns chat and membership or throws Forbidden"""
-
-    chat = get_chat_or_error(chat_id)
-    membership = get_user_chat_membership(chat_id, user_id)
-
-    if not membership:
-        raise Forbidden()
-
-    return chat, membership
 
 
 def create_chat(user: User, data: dict) -> tuple[Chat, ChatMembership]:

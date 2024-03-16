@@ -15,7 +15,7 @@ export type ChatsArr = {
 };
 
 export type ApiChatMembership = {
-  userId: string;
+  user: Author;
   chat: ApiChat;
   id: number;
   joinedAt: string;
@@ -23,4 +23,10 @@ export type ApiChatMembership = {
 
 export type ChatCreateData = {
   name: string;
+};
+
+export type ChatInvite = {
+  id: number;
+  code: string;
+  chat_id: string;
 };

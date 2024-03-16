@@ -43,10 +43,10 @@ export async function joinChat(
   const api = getAuthorizedApi(user);
 
   const inviteCode = inviteLink;
-  const response = await api.post(`/invite?code=${inviteCode}`);
+  const response = await api.post(`/chats/invites/${inviteCode}/join`);
 
-  const apiChat = response.data as ApiChat;
-  const chat = new Chat(apiChat, user);
+  const apiChat = response.data as ApiChatMembership;
+  const chat = new Chat(apiChat.chat, user);
 
   return chat;
 }

@@ -1,6 +1,8 @@
+from uuid import UUID
+import uuid
 from . import db, Model
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import ForeignKey, String, Text, Index
+from sqlalchemy import ForeignKey, String, Text, Index, Uuid
 from datetime import datetime
 from typing import List
 from .mixins import TimestampMixin
@@ -73,6 +75,8 @@ class Chat(TimestampMixin, Model):
     members: Mapped[List[User]] = relationship(
         secondary=ChatMembership.__tablename__, back_populates="chats")
 
+    invites: Mapped[List["ChatInvite"]] = relationship(back_populates="chat")
+
     def to_json(self):
         return {
             "id": self.id,
@@ -117,20 +121,21 @@ class Message(TimestampMixin, Model):
 
 
 class ChatInvite(TimestampMixin, Model):
-    __tablename__ = "chatInvites"
+    __tablename__ = "chat_invites"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    code: Mapped[str] = mapped_column(String(255))
+    code: Mapped[UUID] = mapped_column(Uuid, index=True, default=uuid.uuid4)
 
     chat_id: Mapped[int] = mapped_column(
         ForeignKey("chats.id", ondelete="CASCADE")
     )
-    chat: Mapped[Chat] = relationship(lazy="joined")
+    chat: Mapped[Chat] = relationship(back_populates="invites", lazy="joined")
 
     def to_json(self):
         return {
             "id": self.id,
-            "code": self.code,
+            "code": str(self.code),
             "chat_id": self.chat_id,
+            "chat": self.chat.to_json(),
             "created_at": self.created_at
         }

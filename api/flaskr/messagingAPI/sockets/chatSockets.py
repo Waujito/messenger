@@ -7,10 +7,11 @@ from socketio import server
 
 from flaskr.db.models import Chat, User
 
-from flaskr.messagingAPI.chatsSerivce import ensure_membership
 
 from flaskr.auth.userController import authorize_jwt, authorize_socketio
 from werkzeug.exceptions import BadRequest, Unauthorized, Forbidden, HTTPException
+
+from flaskr.messagingAPI.chatMembershipService import ensure_membership
 
 
 class MessagingNamespace(Namespace):

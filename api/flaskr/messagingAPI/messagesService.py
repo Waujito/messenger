@@ -1,10 +1,11 @@
 from os import name
 
+from flaskr.messagingAPI.chatMembershipService import ensure_membership
 from flaskr.messagingAPI.sockets.chatSockets import MessagingNamespace
 from ..db.models import User, db, Chat, Message
 from sqlalchemy import select
 from werkzeug.exceptions import NotFound, Forbidden, BadRequest
-from .chatsSerivce import ensure_membership, get_chat_or_error
+from .chatsSerivce import get_chat_or_error
 import re
 from .sockets import socketio
 
