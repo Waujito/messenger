@@ -109,7 +109,7 @@ function sendButton() {
   background-color: $bg-func;
   color: $cl-func;
 
-  border-left: 2px solid $bg-message;
+  border-left: 2px solid $bg-func-active;
 
   .senderInfo {
     height: 50px;

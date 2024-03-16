@@ -1,3 +1,4 @@
+// dark colors
 $dark-bg0: #181818;
 $dark-bg1: #1f1f1f;
 $dark-bg2: #2b2b2b;
@@ -10,6 +11,22 @@ $dark-hov0: #343434;
 
 $dark-popupMask-cl: rgba(255, 255, 255, 0.1);
 
+// light colors
+
+$light-bg0: #ffffff;
+$light-bg1: #cccccc;
+$light-bg2: #ffffff;
+$light-bg4: #e1e1e1;
+
+$light-cl0: #181818;
+$light-cl1: #1f1f1f;
+$light-cl2: #2b2b2b;
+
+$light-hov0: #aeaeae;
+
+$light-popupMask-cl: rgba(0, 0, 0, 0.2);
+
+// theme based colors
 $bg-func: $dark-bg0;
 $cl-func: $dark-cl1;
 $hov-func: $dark-hov0;
@@ -19,9 +36,30 @@ $bg-chat: $dark-bg1;
 $bg-message: $dark-bg2;
 $cl-message: $dark-cl2;
 
+$bg-func-active: $dark-bg2;
+
 $cl-ftext: $dark-cl0;
 
 $mask-color: $dark-popupMask-cl;
+
+//
+
+// $bg-func: $light-bg0;
+// $cl-func: $light-cl1;
+// $hov-func: $light-hov0;
+
+// $bg-chat: $light-bg1;
+
+// $bg-message: $light-bg2;
+// $cl-message: $light-cl2;
+
+// $bg-func-active: $light-bg4;
+
+// $cl-ftext: $light-cl0;
+
+// $mask-color: $light-popupMask-cl;
+
+//
 
 $green_button_normal: #2c9f4b;
 $green_button_hover: #237e3b;

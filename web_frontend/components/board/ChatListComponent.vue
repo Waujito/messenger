@@ -72,11 +72,11 @@ function chatCreated(chat: Chat) {
     user-select: none;
 
     &.activeChat {
-      background-color: $bg-message;
+      background-color: $bg-func-active;
     }
 
     &:hover {
-      background-color: $dark-hov0;
+      background-color: $hov-func;
     }
   }
 
@@ -89,11 +89,11 @@ function chatCreated(chat: Chat) {
     align-items: center;
     cursor: pointer;
 
-    background-color: $bg-message;
+    background-color: $bg-func-active;
 
     margin-top: 10px;
     &:hover {
-      background-color: $dark-hov0;
+      background-color: $hov-func;
     }
   }
 }

@@ -131,7 +131,7 @@ const showInfo = ref<boolean>(false);
     align-items: center;
 
     background-color: $bg-func;
-    border-left: 2px solid $bg-message;
+    border-left: 2px solid $bg-func-active;
 
     cursor: pointer;
   }
