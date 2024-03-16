@@ -1,2 +1,2 @@
 include:
-  - nuxt/_*
+  - _*.css
