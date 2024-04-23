@@ -103,6 +103,7 @@ export const useUserStore = defineStore("user", () => {
 
   function logout() {
     dropUser();
+    console.log("user logged out!");
 
     router.push("/");
   }
