@@ -8,3 +8,7 @@ export function baseURL() {
 export function API_URL() {
   return useRuntimeConfig().public.apiURL;
 }
+
+export function API_URI() {
+  return useRuntimeConfig().public.apiURI;
+}

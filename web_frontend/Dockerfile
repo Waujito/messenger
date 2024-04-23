@@ -3,6 +3,10 @@
 FROM node:20-alpine as build
 WORKDIR /app
 
+ARG apiURI, apiURL
+ENV NUXT_PUBLIC_API_URI $apiURI
+ENV NUXT_PUBLIC_API_URL $apiURL
+
 COPY ./package.json .
 COPY ./yarn.lock .
 RUN yarn install

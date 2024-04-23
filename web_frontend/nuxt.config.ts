@@ -19,6 +19,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiURL: "",
+      apiURI: "",
     },
   },
 });

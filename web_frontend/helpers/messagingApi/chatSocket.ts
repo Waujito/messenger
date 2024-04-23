@@ -1,16 +1,17 @@
 import { Socket, io } from "socket.io-client";
-import { API_URL } from "../app";
+import { API_URL, API_URI } from "../app";
 import type { ReadyUser } from "~/types/user";
 
 let socket: Socket | undefined;
 
 function initSocket(user: ReadyUser) {
-  if (!socket)
-    socket = io(`${API_URL()}/chat`, {
+  if (!socket) {
+    socket = io(`${API_URI()}/chat`, {
       auth: {
         token: user.token.rawToken,
       },
     });
+  }
 
   return socket;
 }

@@ -14,6 +14,8 @@ services:
     networks:
       messenger:
         ipv4_address: 10.5.1.3
+    env_file:
+      - .frontend.env
     ports:
       - 80:3000
     working_dir: /frontend
@@ -34,9 +36,9 @@ services:
       messenger:
         ipv4_address: 10.5.1.10
     ports:
-      - 8080:80
+      - 8090:80
     env_file:
-      - ./api/.env
+      - .api.env
       - .postgresql.env
     depends_on:
       - postgres
@@ -56,10 +58,23 @@ services:
       - 443:443
       - 47485:80
     env_file:
-      - ./api/.env
+      - .api.env
       - .postgresql.env
     volumes:
       - ./crt:/crt
+
+  frontend_prod: 
+    build:
+      context: web_frontend 
+      target: serve
+      args:
+        - apiURI=${PROD_API_URI}
+        - apiURL=${PROD_API_URL}
+    networks:
+      messenger:
+        ipv4_address: 10.5.1.12
+    ports: 
+      - 3000:80
 
   postgres:
     image: postgres:16-alpine
@@ -88,6 +103,24 @@ services:
         ipv4_address: 10.5.1.101    
     ports:
       - 8081:8080
+
+  nginx:
+    build:
+      context: nginx
+
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 3s
+        max_attempts: 5
+        window: 60s
+    networks:
+      messenger:
+        ipv4_address: 10.5.1.80
+
+    ports:
+      - 8080:80
+    
 
 volumes:
   pgstorage:     
